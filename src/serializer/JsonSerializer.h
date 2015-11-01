@@ -35,6 +35,15 @@ public:
 	{ }
 	~SerializerDefault();
 	void operator or(T const& t);
+
+	template<typename T2, typename std::enable_if<std::is_default_constructible<T2>::value>::type* = nullptr>
+	void setDefault() {
+		*this or T2();
+	}
+	template<typename T2, typename std::enable_if<not std::is_default_constructible<T2>::value>::type* = nullptr>
+	void setDefault() {
+	}
+
 };
 
 class SerializerNodeInput {
@@ -221,7 +230,7 @@ SerializerDefault<T>::~SerializerDefault() {
 
 	serializer.serialize(node[name], value, nodePath);
 	if (not defaultValueGiven) {
-		*this or T();
+		setDefault<T>();
 	}
 
 	if (node[name] == defaultNode) {
