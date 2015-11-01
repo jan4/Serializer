@@ -7,12 +7,10 @@
 	"projects": [
 		{ "path": "serializer",
 			"dependencies": ["jsoncpp/lib_json"],
-			"optionalDependencies": ["Armadillo/armadilloBits", "GenericFactory/genericFactory", "Units/units"],
-		 	"type": "library"
+			"optionalDependencies": ["Armadillo/armadilloBits", "GenericFactory/genericFactory", "Units/units"]
 		},
 		{ "path": "testSerializer",
-			"dependencies": ["gtest/gtest", "Serializer/serializer"],
-			"type": "executable"
+			"dependencies": ["gtest/gtest", "Serializer/serializer"]
 		}
 	]
 }
