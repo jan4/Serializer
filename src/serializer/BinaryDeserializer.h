@@ -126,6 +126,9 @@ private:
 	};
 	std::vector<RawAddress> rawAddresses;
 
+	std::map<int32_t, int32_t> ptrIdToBufferPos;
+	std::map<int32_t, std::shared_ptr<void>> idToShared;
+
 public:
 	Deserializer(std::vector<uint8_t> const& _data)
 		: buffer {_data} {
@@ -135,6 +138,7 @@ public:
 		int stack = getCurrentPosition();
 		setCurrentPosition(sizeof(int32_t) + size);
 
+		// Deseiralizing int to string (of string compression)
 		int32_t stringSize;
 		deserialize(stringSize, false);
 
@@ -147,6 +151,20 @@ public:
 			stringToInt[str]   = index;
 			intToString[index] = str;
 		}
+		// Reading shared object positions
+		// serialize shared objects
+		int32_t sharedObjectSize;
+		deserialize(sharedObjectSize, false);
+		for (int32_t i {0}; i < int32_t(sharedObjectSize); ++i) {
+			int32_t ptrId;
+			deserialize(ptrId, false);
+			int32_t sizePos;
+			deserialize(sizePos, false);
+			ptrIdToBufferPos[ptrId] = getCurrentPosition();
+
+			setCurrentPosition(getCurrentPosition() + sizePos - sizeof(int32_t));
+		}
+
 		setCurrentPosition(stack);
 	}
 	void close() {
@@ -178,6 +196,20 @@ public:
 	void addKnownAddress(void const* _ptr, int32_t  _count, int32_t _size, int32_t _bufferPos, std::type_info const& _type_info) {
 		knownAddresses.push_back({_ptr, _count, _size, _type_info, _bufferPos});
 	}
+
+	template<typename T>
+	void getSharedObject(int32_t _ptrId, std::shared_ptr<T>& _value) {
+		if (idToShared.find(_ptrId) == idToShared.end()) {
+			std::shared_ptr<T> value = std::make_shared<T>();
+			auto currentPos = getCurrentPosition();
+			setCurrentPosition(ptrIdToBufferPos.at(_ptrId));
+			deserialize(*value.get(), false);
+			idToShared[_ptrId] = value;
+			setCurrentPosition(currentPos);
+		}
+		_value = std::static_pointer_cast<T, void>(idToShared.at(_ptrId));
+	}
+
 
 	uint8_t* getPtr() {
 		return &buffer[0];
@@ -270,6 +302,18 @@ public:
 
 	template<typename T>
 	void deserialize(std::shared_ptr<T>& _value, bool _needToKnowAddress) {
+		if (_needToKnowAddress) {
+			addKnownAddress(&_value, 1, sizeof(std::shared_ptr<T>), getCurrentPosition(), typeid(std::shared_ptr<T>));
+		}
+
+		int32_t ptrId;
+		deserialize(ptrId, false);
+		if (ptrId != -1) {
+			getSharedObject(ptrId, _value);
+		} else {
+			_value.reset();
+		}
+
 	}
 
 

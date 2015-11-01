@@ -96,6 +96,10 @@ private:
 		int32_t     bufferPos; // position in serialized buffer
 	};
 	std::vector<RawAddress> rawAddresses;
+
+	std::vector<std::function<void()>> sharedObjectFunctions;
+	std::map<void const*, int32_t> sharedToId;
+
 public:
 	Serializer() {
 		// serialize number which jumps directly to lookup table of string to int32
@@ -137,6 +141,17 @@ public:
 			serialize(e.second, false);
 			serialize(e.first, false);
 		}
+		// serialize shared objects
+		int32_t sharedObjectSize = sharedObjectFunctions.size();
+		serialize(sharedObjectSize, false);
+		for (int32_t i {0}; i < int32_t(sharedObjectFunctions.size()); ++i) {
+			serialize(i, false);
+			auto sizePos = getCurrentPosition();
+			serialize(int32_t(), false);
+			sharedObjectFunctions[i]();
+			int32_t size = getCurrentPosition() - sizePos;
+			memcpy(&buffer[sizePos], &size, sizeof(size));
+		}
 	}
 
 	SerializerNodeInput const& getRootNode() const {
@@ -158,6 +173,19 @@ public:
 	void addKnownAddress(void const* _ptr, int32_t  _count, int32_t _size, int32_t _bufferPos, std::type_info const& _type_info) {
 		knownAddresses.push_back({_ptr, _count, _size, _type_info, _bufferPos});
 	}
+
+	template<typename T>
+	int32_t addSharedObject(std::shared_ptr<T>& _value) {
+		if (sharedToId.find(_value.get()) == sharedToId.end()) {
+			int32_t id = sharedObjectFunctions.size();
+			sharedToId[_value.get()] = id;
+			sharedObjectFunctions.push_back([=]() {
+				serialize(*_value.get(), false);
+			});
+		}
+		return sharedToId.at(_value.get());
+	}
+
 
 
 	int getCurrentPosition() const {
@@ -246,6 +274,16 @@ public:
 	}
 	template<typename T>
 	void serialize(std::shared_ptr<T>& _value, bool _needToKnowAddress) {
+		if (_needToKnowAddress) {
+			addKnownAddress(&_value, 1, sizeof(std::shared_ptr<T>), getCurrentPosition(), typeid(std::shared_ptr<T>));
+		}
+
+		int32_t ptrId = {-1};
+		if (_value.get() != nullptr) {
+			ptrId = addSharedObject(_value);
+		}
+		serialize(ptrId, false);
+
 	}
 
 	template<typename T, typename std::enable_if<not std::is_fundamental<T>::value
