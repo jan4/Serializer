@@ -19,6 +19,7 @@ namespace serializer {
 		}
 		template<typename Adapter>
 		static void deserialize(Adapter& adapter, std::vector<T>& x) {
+			x.clear();
 			std::function<void(T const&)> func = [&x](T const& v) {
 				x.push_back(v);
 			};
@@ -35,6 +36,7 @@ namespace serializer {
 		}
 		template<typename Adapter>
 		static void deserialize(Adapter& adapter, std::list<T>& x) {
+			x.clear();
 			std::function<void(T const&)> func = [&x](T const& v) {
 				x.push_back(v);
 			};
@@ -51,6 +53,7 @@ namespace serializer {
 		}
 		template<typename Adapter>
 		static void deserialize(Adapter& adapter, std::set<T>& x) {
+			x.clear();
 			std::function<void(T const&)> func = [&x](T const& v) {
 				x.insert(v);
 			};
@@ -91,6 +94,7 @@ namespace serializer {
 		}
 		template<typename Adapter>
 		static void deserialize(Adapter& adapter, std::map<Key, Value>& x) {
+			x.clear();
 			std::function<void(std::pair<Key, Value> const&)> func = [&x]
 			(std::pair<Key, Value> const& v) {
 				x.insert(v);
