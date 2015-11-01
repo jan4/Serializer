@@ -20,6 +20,7 @@ private:
 	std::string  name;
 	Json::Value& node;
 	Json::Value  defaultNode;
+	bool         defaultValueGiven;
 	T&           value;
 	NodePath     nodePath;
 
@@ -28,6 +29,7 @@ public:
 		: serializer { _serializer  }
 		, name       { _name }
 		, node       { _node }
+		, defaultValueGiven { false }
 		, value      { _value }
 		, nodePath   { _nodePath }
 	{ }
@@ -218,6 +220,9 @@ SerializerDefault<T>::~SerializerDefault() {
 	}
 
 	serializer.serialize(node[name], value, nodePath);
+	if (not defaultValueGiven) {
+		*this or T();
+	}
 
 	if (node[name] == defaultNode) {
 		node.removeMember(name);
@@ -230,6 +235,7 @@ void SerializerDefault<T>::operator or(T const& t) {
 	ser.getRootNode() % p;
 	ser.close();
 	defaultNode = ser.getNode();
+	defaultValueGiven = true;
 }
 
 

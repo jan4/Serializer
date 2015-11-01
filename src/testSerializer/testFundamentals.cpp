@@ -1,8 +1,6 @@
 #include <serializer/serializer.h>
 #include <gtest/gtest.h>
 
-#include <iostream>
-
 template<typename T1, typename T2>
 class TestF {
 public:
@@ -119,6 +117,38 @@ struct List12 {
 	}
 };
 
+struct List12_nested {
+	std::vector<List12> list;
+
+	template<typename Node>
+	void serialize(Node& node) {
+		node["list_nested"] % list or std::vector<List12>{List12{{1, 2}}, List12{{1, 2}}};
+	}
+
+	bool operator==(List12_nested const& _other) const {
+		return list == _other.list;
+	}
+	bool operator!=(List12_nested const& _other) const {
+		return list != _other.list;
+	}
+};
+struct List12_nested2 {
+	std::vector<List12> list;
+
+	template<typename Node>
+	void serialize(Node& node) {
+		node["list_nested2"] % list;
+	}
+
+	bool operator==(List12_nested2 const& _other) const {
+		return list == _other.list;
+	}
+	bool operator!=(List12_nested2 const& _other) const {
+		return list != _other.list;
+	}
+};
+
+
 
 
 template<typename S, typename D>
@@ -219,6 +249,12 @@ void fullTestClasses() {
 	TestF<S, D>::runEQ(List12{{1}});
 	TestF<S, D>::runEQ(List12{{1, 2}});
 	TestF<S, D>::runEQ(List12{{1, 2, 3}});
+	TestF<S, D>::runEQ(List12_nested{{}});
+	TestF<S, D>::runEQ(List12_nested{{List12{{1, 2}}}});
+	TestF<S, D>::runEQ(List12_nested{{List12{{1, 2}}, List12{{1, 2}}}});
+	TestF<S, D>::runEQ(List12_nested2{{}});
+	TestF<S, D>::runEQ(List12_nested2{{List12{{1, 2}}}});
+	TestF<S, D>::runEQ(List12_nested2{{List12{{1, 2}}, List12{{1, 2}}}});
 
 }
 
