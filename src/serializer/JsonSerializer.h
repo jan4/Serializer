@@ -233,18 +233,21 @@ SerializerDefault<T>::~SerializerDefault() {
 		setDefault<T>();
 	}
 
-	if (node[name] == defaultNode) {
+	if (defaultValueGiven and node[name] == defaultNode) {
 		node.removeMember(name);
 	}
 }
 template<typename T>
 void SerializerDefault<T>::operator or(T const& t) {
-	Serializer ser;
-	T p = t;
-	ser.getRootNode() % p;
-	ser.close();
-	defaultNode = ser.getNode();
-	defaultValueGiven = true;
+	try {
+		Serializer ser;
+		T p = t;
+		ser.getRootNode() % p;
+		ser.close();
+		defaultNode = ser.getNode();
+		defaultValueGiven = true;
+	} catch (...) {
+	}
 }
 
 
