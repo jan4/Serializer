@@ -118,6 +118,9 @@ class Serializer {
 	};
 	std::map<void const*, RawAddress> rawAddresses;
 
+	Json::Value sharedObjectNode { Json::arrayValue };
+	std::map<void const*, int32_t> sharedToId;
+
 public:
 	void close();
 
@@ -146,6 +149,21 @@ public:
 
 	void addKnownAddress(void const* _ptr, NodePath const& _bufferPos) {
 		knownAddresses[_ptr].bufferPos.push_back(_bufferPos);
+	}
+
+	template<typename T>
+	int32_t addSharedObject(std::shared_ptr<T>& _value) {
+		if (sharedToId.find(_value.get()) == sharedToId.end()) {
+			int32_t id = sharedObjectNode.size();
+			sharedToId[_value.get()] = id;
+			sharedObjectNode.append(Json::Value{});
+			Json::Value value;
+			serialize(value, *_value, {"__sharedObjects"});
+
+			sharedObjectNode[id] = value;
+
+		}
+		return sharedToId.at(_value.get());
 	}
 
 	template<typename T, typename std::enable_if<std::is_same<T, bool>::value
@@ -200,9 +218,16 @@ public:
 		int32_t ptrId = iter->second.ptrId;
 		serialize(_node, ptrId, _nodePath);
 		addKnownAddress(&_value, _nodePath);
-
 	}
 
+	template<typename T>
+	void serialize(Json::Value& _node, std::shared_ptr<T>& _value, NodePath const& _nodePath) {
+		int32_t ptrId = {-1};
+		if (_value.get() != nullptr) {
+			ptrId = addSharedObject(_value);
+		}
+		serialize(_node, ptrId, _nodePath);
+	}
 
 	template<typename T, typename std::enable_if<not std::is_fundamental<T>::value
 	                                             and not std::is_same<T, std::string>::value

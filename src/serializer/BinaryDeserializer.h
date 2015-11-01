@@ -268,16 +268,9 @@ public:
 		}
 	}
 
-/*	template<typename T>
-	void deserialize(std::unique_ptr<T>& _value, bool _needToKnowAddress) {
-		if (_value != nullptr) {
-			int32_t x;
-			deserialize(x, _needToKnowAddress);
-		} else {
-			int32_t x;
-			deserialize(x, _needToKnowAddress);
-		}
-	}*/
+	template<typename T>
+	void deserialize(std::shared_ptr<T>& _value, bool _needToKnowAddress) {
+	}
 
 
 	template<typename T, typename std::enable_if<not std::is_fundamental<T>::value

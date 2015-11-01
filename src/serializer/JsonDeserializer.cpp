@@ -34,12 +34,19 @@ Deserializer::Deserializer(std::vector<uint8_t> const& _data) {
 	if (not reader.parse(str, node)) {
 		throw std::runtime_error("Parsing file failed: "+reader.getFormattedErrorMessages());
 	}
+	if (node.isObject() and node.isMember("__sharedObjects")) {
+		sharedObjectNode = node["__sharedObjects"];
+	}
+
 }
 Deserializer::Deserializer(std::string const& _data) {
 	Json::Reader reader;
 	std::string str(_data);
 	if (not reader.parse(str, node)) {
 		throw std::runtime_error("Parsing file failed: "+reader.getFormattedErrorMessages());
+	}
+	if (node.isObject() and node.isMember("__sharedObjects")) {
+		sharedObjectNode = node["__sharedObjects"];
 	}
 }
 

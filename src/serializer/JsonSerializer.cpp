@@ -51,6 +51,9 @@ void Serializer::close() {
 		serialize(values, nodePaths, {});
 		node["__ownerlessObjects"] = values;
 	}
+	if (not sharedToId.empty()) {
+		node["__sharedObjects"] = sharedObjectNode;
+	}
 }
 
 

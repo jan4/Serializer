@@ -12,6 +12,10 @@ public:
 		bs1.getRootNode() % _in;
 		bs1.close();
 
+		//std::cout<<"json:"<<std::endl;
+		//std::cout<<(char*)bs1.getData().data()<<std::endl;
+		//std::cout<<":json"<<std::endl;
+
 		T2 bs2 (bs1.getData());
 
 		bs2.getRootNode() % _out;
@@ -49,14 +53,6 @@ struct B {
 		node["ptr"] % ptr;
 	}
 };
-struct C {
-	std::unique_ptr<A> a { new A() };
-	template<typename Node>
-	void serialize(Node& node) {
-		node["a"] % a;
-	}
-};
-
 struct AD {
 	A a;
 	A* aPtr;
@@ -317,6 +313,35 @@ void fullTest() {
 		EXPECT_EQ(out.b.ptr, &out.a);
 	}
 
+}
+
+
+TEST(TestPointers, TestPointers) {
+	fullTest<SB, DB>();
+	fullTest<SJ, DJ>();
+}
+
+
+struct C {
+	std::unique_ptr<A> a { new A() };
+	template<typename Node>
+	void serialize(Node& node) {
+		node["a"] % a;
+	}
+};
+
+struct C_SPtr {
+	std::shared_ptr<A> a { std::make_shared<A>() };
+	template<typename Node>
+	void serialize(Node& node) {
+		node["a"] % a;
+	}
+};
+
+
+
+template<typename S, typename D>
+void fullTestSmartPointers() {
 	{
 		C in, out;
 		in.a->x  = 5;
@@ -326,15 +351,23 @@ void fullTest() {
 		EXPECT_NE(out.a, nullptr);
 		EXPECT_EQ(out.a->x, in.a->x);
 	}
+	{
+		C_SPtr in, out;
+		in.a->x  = 5;
+		out.a->x = 0;
+		EXPECT_NE(out.a, nullptr);
 
-
-
+		TestF<S, D>::run(in, out);
+		EXPECT_EQ(in.a->x, 5);
+		EXPECT_NE(out.a, nullptr);
+		EXPECT_EQ(out.a->x, in.a->x);
+	}
 
 }
 
+TEST(TestPointers, TestUniquePtrs) {
+	fullTestSmartPointers<SB, DB>();
+	fullTestSmartPointers<SJ, DJ>();
 
-TEST(TestPointers, TestPointers) {
-	fullTest<SB, DB>();
-	fullTest<SJ, DJ>();
 }
 

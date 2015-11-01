@@ -9,7 +9,6 @@
 #include "Converter.h"
 #include "has_serialize_function.h"
 
-
 namespace serializer {
 namespace json {
 
@@ -124,6 +123,9 @@ class Deserializer {
 	};
 	std::map<int32_t, RawAddress> rawAddresses;
 
+	Json::Value sharedObjectNode { Json::arrayValue };
+	std::map<int32_t, std::shared_ptr<void>> idToShared;
+
 public:
 	Deserializer(std::vector<uint8_t> const& _data);
 	Deserializer(std::string const& _data);
@@ -140,6 +142,17 @@ public:
 	void addKnownAddress(void const* _ptr, NodePath const& _bufferPos) {
 		knownAddresses[_bufferPos] = {_ptr, _bufferPos};
 	}
+
+	template<typename T>
+	void getSharedObject(int32_t _ptrId, std::shared_ptr<T>& _value) {
+		if (idToShared.find(_ptrId) == idToShared.end()) {
+			std::shared_ptr<T> value = std::make_shared<T>();
+			deserialize(sharedObjectNode[_ptrId], *value.get(), {"__sharedObjects"});
+			idToShared[_ptrId] = value;
+		}
+		_value = std::static_pointer_cast<T, void>(idToShared.at(_ptrId));
+	}
+
 
 	Json::Value& getNode() { return node; }
 
@@ -233,7 +246,6 @@ public:
 
 	template<typename T>
 	void deserialize(Json::Value& _node, T*& _value, NodePath const& _nodePath) {
-
 		int32_t ptrId;
 		deserialize(_node, ptrId, _nodePath);
 		_value = nullptr;
@@ -241,11 +253,22 @@ public:
 		addKnownAddress(&_value, _nodePath);
 
 	}
+
+	template<typename T>
+	void deserialize(Json::Value& _node, std::shared_ptr<T>& _value, NodePath const& _nodePath) {
+		_value.reset();
+
+		int32_t ptrId;
+		deserialize(_node, ptrId, _nodePath);
+		if (ptrId >= 0) {
+			getSharedObject(ptrId, _value);
+		}
+	}
+
 	template<typename T, typename std::enable_if<not std::is_fundamental<T>::value
 	                                             and not std::is_same<T, std::string>::value
 	                                             and not has_serialize_function<T, DeserializerNode>::value>::type* = nullptr>
 	void deserialize(Json::Value& _node, T& _value, NodePath const& _nodePath) {
-
 		addKnownAddress(&_value, _nodePath);
 
 		DeserializerAdapter adapter(*this, _node, _nodePath);
