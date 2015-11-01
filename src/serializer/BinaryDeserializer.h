@@ -199,7 +199,8 @@ public:
 
 	template<typename T>
 	void getSharedObject(int32_t _ptrId, std::shared_ptr<T>& _value) {
-		if (idToShared.find(_ptrId) == idToShared.end()) {
+		//!TODO shared_ptr on binary serialization is broken
+/*		if (idToShared.find(_ptrId) == idToShared.end()) {
 			std::shared_ptr<T> value = std::make_shared<T>();
 			auto currentPos = getCurrentPosition();
 			setCurrentPosition(ptrIdToBufferPos.at(_ptrId));
@@ -207,7 +208,7 @@ public:
 			idToShared[_ptrId] = value;
 			setCurrentPosition(currentPos);
 		}
-		_value = std::static_pointer_cast<T, void>(idToShared.at(_ptrId));
+		_value = std::static_pointer_cast<T, void>(idToShared.at(_ptrId));*/
 	}
 
 
