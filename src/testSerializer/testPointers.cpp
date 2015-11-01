@@ -317,15 +317,15 @@ void fullTest() {
 		EXPECT_EQ(out.b.ptr, &out.a);
 	}
 
-/*	{
+	{
 		C in, out;
 		in.a->x  = 5;
 		out.a->x = 0;
 		TestF<S, D>::run(in, out);
 		EXPECT_EQ(in.a->x, 5);
 		EXPECT_NE(out.a, nullptr);
-		EXPECT_EQ(out.a->x, 5);
-	}*/
+		EXPECT_EQ(out.a->x, in.a->x);
+	}
 
 
 

@@ -4,6 +4,7 @@
 
 #include <list>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -119,6 +120,48 @@ namespace serializer {
 			x = (char*)v.data();
 		}
 	};
+
+	template<typename T>
+	class Converter<std::unique_ptr<T>> {
+	public:
+		struct SerUPtr {
+			std::unique_ptr<T>& ptr;
+			template<typename Node>
+			void serialize(Node& node) {
+				bool valid = ptr.get() != nullptr;
+				node["valid"] % valid;
+				if (valid) {
+					node["data"] % *(ptr.get());
+				}
+			}
+		};
+		struct DeserUPtr {
+			std::unique_ptr<T>& ptr;
+			template<typename Node>
+			void serialize(Node& node) {
+				bool valid;
+				node["valid"] % valid;
+				if (valid) {
+					ptr.reset(new T{});
+					node["data"] % *(ptr.get());
+				} else {
+					ptr.reset();
+				}
+			}
+		};
+
+		template<typename Adapter>
+		static void serialize(Adapter& adapter, std::unique_ptr<T>& x) {
+			SerUPtr ptr {x};
+			adapter.serialize(ptr);
+		}
+		template<typename Adapter>
+		static void deserialize(Adapter& adapter, std::unique_ptr<T>& x) {
+			DeserUPtr ptr {x};
+			adapter.deserialize(ptr);
+		}
+	};
+
 }
 
 

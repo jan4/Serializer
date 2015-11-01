@@ -240,35 +240,7 @@ public:
 		rawAddresses[ptrId].needOverwrite.push_back((void*)&_value);
 		addKnownAddress(&_value, _nodePath);
 
-
-/*		auto iter = rawAddresses.find(_value);
-		if (iter == rawAddresses.end()) {
-			int32_t ptrId = rawAddresses.size();
-			rawAddresses[_value] = {ptrId, _nodePath};
-			iter = rawAddresses.find(_value);
-		}
-		int32_t ptrId = iter->second.ptrId;
-		serialize(_node, ptrId, _nodePath);*/
-
-/*		_value = nullptr;
-		int32_t pos;
-		deserialize(pos);
-		if (pos != 0) {
-			rawAddresses.push_back(RawAddress{&_value, pos});
-		}*/
 	}
-
-	template<typename T>
-	void deserialize(Json::Value& _node, std::unique_ptr<T>& _value, NodePath const& _nodePath) {
-/*		if (_value != nullptr) {
-			int32_t x;
-			deserialize(x);
-		} else {
-			int32_t x;
-			deserialize(x);
-		}*/
-	}
-
 	template<typename T, typename std::enable_if<not std::is_fundamental<T>::value
 	                                             and not std::is_same<T, std::string>::value
 	                                             and not has_serialize_function<T, DeserializerNode>::value>::type* = nullptr>

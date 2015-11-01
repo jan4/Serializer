@@ -34,7 +34,16 @@ public:
 		, nodePath   { _nodePath }
 	{ }
 	~SerializerDefault();
-	void operator or(T const& t);
+
+	void operator or(T const& t) {
+		setDefault(t);
+	}
+
+	template<typename T2, typename std::enable_if<std::is_copy_constructible<T2>::value>::type* = nullptr>
+	void setDefault(T2 const& t);
+
+	template<typename T2, typename std::enable_if<not std::is_copy_constructible<T2>::value>::type* = nullptr>
+	void setDefault(T2 const& t);
 
 	template<typename T2, typename std::enable_if<std::is_default_constructible<T2>::value>::type* = nullptr>
 	void setDefault() {
@@ -194,15 +203,6 @@ public:
 
 	}
 
-	template<typename T>
-	void serialize(Json::Value& _node, std::unique_ptr<T>& _value, NodePath const& _nodePath) {
-/*		if (_value != nullptr) {
-			serialize(int32_t());
-		} else {
-			serialize(int32_t());
-		}*/
-	}
-
 
 	template<typename T, typename std::enable_if<not std::is_fundamental<T>::value
 	                                             and not std::is_same<T, std::string>::value
@@ -238,7 +238,8 @@ SerializerDefault<T>::~SerializerDefault() {
 	}
 }
 template<typename T>
-void SerializerDefault<T>::operator or(T const& t) {
+template<typename T2, typename std::enable_if<std::is_copy_constructible<T2>::value>::type*>
+void SerializerDefault<T>::setDefault(T2 const& t) {
 	try {
 		Serializer ser;
 		T p = t;
@@ -249,6 +250,12 @@ void SerializerDefault<T>::operator or(T const& t) {
 	} catch (...) {
 	}
 }
+
+template<typename T>
+template<typename T2, typename std::enable_if<not std::is_copy_constructible<T2>::value>::type*>
+void SerializerDefault<T>::setDefault(T2 const& t) {
+}
+
 
 
 template<typename T>

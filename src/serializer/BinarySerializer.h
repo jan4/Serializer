@@ -244,14 +244,14 @@ public:
 		}
 		serialize(int32_t(), false);
 	}
-	template<typename T>
+/*	template<typename T>
 	void serialize(std::unique_ptr<T>& _value) {
 		if (_value != nullptr) {
 			serialize(int32_t(), false);
 		} else {
 			serialize(int32_t(), false);
 		}
-	}
+	}*/
 
 	template<typename T, typename std::enable_if<not std::is_fundamental<T>::value
 	                                             and not has_serialize_function<T, SerializerNode>::value>::type* = nullptr>
