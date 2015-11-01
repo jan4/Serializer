@@ -72,8 +72,13 @@ struct SerializerAdapter {
 
 	template<typename T>
 	void serialize(T& _value);
+
 	template<typename Iter>
 	void serializeByIter(Iter iter, Iter end);
+
+	template<typename Iter>
+	void serializeByIterCopy(Iter iter, Iter end);
+
 };
 
 

@@ -47,7 +47,7 @@ namespace serializer {
 	public:
 		template<typename Adapter>
 		static void serialize(Adapter& adapter, std::set<T>& x) {
-			adapter.serializeByIter(x.begin(), x.end());
+			adapter.serializeByIterCopy(x.begin(), x.end());
 		}
 		template<typename Adapter>
 		static void deserialize(Adapter& adapter, std::set<T>& x) {
