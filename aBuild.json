@@ -1,17 +1,26 @@
 {
-	"name": "Serializer",
-	"extDependencies": [
-		{ "url": "git@78.47.95.250:aBuild/gtest" },
-		{ "url": "git@78.47.95.250:aBuild/jsoncpp" }
-	],
-	"projects": [
-		{ "path": "serializer",
-			"dependencies": ["jsoncpp/lib_json"],
-			"optionalDependencies": ["Armadillo/armadilloBits", "GenericFactory/genericFactory", "Units/units"]
-		},
-		{ "path": "testSerializer",
-			"dependencies": ["gtest/gtest", "Serializer/serializer"]
-		}
-	]
+   "extDependencies" : [
+      {
+         "url" : "git@78.47.95.250:aBuild/gtest"
+      },
+      {
+         "url" : "git@78.47.95.250:aBuild/jsoncpp"
+      }
+   ],
+   "name" : "Serializer",
+   "projects" : [
+      {
+         "dependencies" : [ "jsoncpp/lib_json" ],
+         "optionalDependencies" : [
+            "Armadillo/armadilloBits",
+            "GenericFactory/genericFactory",
+            "Units/units"
+         ],
+         "path" : "serializer"
+      },
+      {
+         "dependencies" : [ "gtest/gtest", "Serializer/serializer" ],
+         "path" : "testSerializer"
+      }
+   ]
 }
-
