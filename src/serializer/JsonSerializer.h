@@ -1,6 +1,8 @@
 #pragma once
 
 #include <json/json.h>
+#include <fstream>
+#include <sstream>
 
 #include "JsonDeserializer.h"
 #include "standardTypes.h"
@@ -106,6 +108,12 @@ public:
 		memcpy(retList.data(), jsonString.c_str(), retList.size());
 		return retList;
 	}
+
+	std::string getDataAsStr() const {
+		Json::StyledWriter jsonWriter;
+		return jsonWriter.write(node);
+	}
+
 	SerializerNodeInput const& getRootNode() const {
 		return rootNode;
 	}
@@ -195,12 +203,12 @@ public:
 		Converter<T>::serialize(adapter, _value);
 	}
 };
-}}
 
+template<typename T>
+void read(std::string const& _file, T& _value);
 
-namespace serializer {
-namespace json {
-
+template<typename T>
+void write(std::string const& _file, T& _value);
 
 template<typename T>
 SerializerDefault<T>::~SerializerDefault() {
@@ -248,6 +256,58 @@ void SerializerAdapter::serializeByIter(Iter iter, Iter end) {
 		node.append(tnode);
 	}
 }
+
+template<typename Iter>
+void SerializerAdapter::serializeByIterCopy(Iter iter, Iter end) {
+	node = Json::Value(Json::arrayValue);
+	int32_t index { 0 };
+	for (; iter != end; ++iter) {
+		auto newNodePath = nodePath;
+		newNodePath.push_back(std::to_string(index++));
+
+		Json::Value tnode;
+		auto t = *iter;
+		serializer.serialize(tnode, t, newNodePath);
+		node.append(tnode);
+	}
+}
+
+
+template<typename T>
+void read(std::string const& _file, T& _value) {
+
+	// Read file from storage
+	std::ifstream ifs(_file);
+	if (ifs.fail()) {
+		throw std::runtime_error("Opening file failed");
+	}
+	std::stringstream strStream;
+	strStream << ifs.rdbuf();
+
+	// parse file in serializer
+	Deserializer serializer(strStream.str());
+	serializer.getRootNode() % _value;
+	serializer.close();
+}
+
+template<typename T>
+void write(std::string const& _file, T& _value) {
+	// Serialize data
+	Serializer serializer;
+	serializer.getRootNode() % _value;
+	serializer.close();
+
+	std::ofstream oFile(_file);
+	if (oFile.fail()) {
+		throw std::runtime_error("Opening file failed");
+	}
+	oFile << serializer.getDataAsStr();
+	oFile.close();
+	if (oFile.fail()) {
+		throw std::runtime_error("Writing to file failed");
+	}
+}
+
 
 }
 }

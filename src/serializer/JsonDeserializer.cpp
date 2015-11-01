@@ -35,6 +35,14 @@ Deserializer::Deserializer(std::vector<uint8_t> const& _data) {
 		throw std::runtime_error("Parsing file failed: "+reader.getFormattedErrorMessages());
 	}
 }
+Deserializer::Deserializer(std::string const& _data) {
+	Json::Reader reader;
+	std::string str(_data);
+	if (not reader.parse(str, node)) {
+		throw std::runtime_error("Parsing file failed: "+reader.getFormattedErrorMessages());
+	}
+}
+
 void Deserializer::close() {
 	// Check if ownerless objects (raw pointers table) are available
 	std::map<int32_t, std::vector<NodePath>> nodePaths;

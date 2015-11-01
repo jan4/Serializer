@@ -126,6 +126,7 @@ class Deserializer {
 
 public:
 	Deserializer(std::vector<uint8_t> const& _data);
+	Deserializer(std::string const& _data);
 
 	void close();
 
