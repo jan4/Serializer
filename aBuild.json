@@ -11,12 +11,8 @@
 		 	"type": "library"
 		},
 		{ "path": "testSerializer",
-			"dependencies": ["Serializer/printSerializer", "gtest/gtest"],
+			"dependencies": ["gtest/gtest", "Serializer/serializer"],
 			"type": "executable"
-		},
-		{ "path": "printSerializer",
-			"dependencies": ["Serializer/serializer"],
-			"type": "library"
 		}
 	]
 }
