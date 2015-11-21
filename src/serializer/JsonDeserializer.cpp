@@ -10,9 +10,9 @@ namespace json {
 DeserializerNode::DeserializerNode(Deserializer& _serializer, Json::Value& _node, bool _available, NodePath const& _nodePath)
 	: serializer { _serializer }
 	, node       { _node }
-	, available  { _available }
 	, nodePath   { _nodePath }
 {
+	(void)_available; // Unused
 }
 
 DeserializerNode::~DeserializerNode() {

@@ -42,7 +42,7 @@ public:
 		_value = T2();
 	}
 	template<typename T2, typename std::enable_if<not std::is_default_constructible<T2>::value>::type* = nullptr>
-	void getDefault(T2& _value) const {
+	void getDefault(T2&) const {
 		throw std::runtime_error("trying to construct object without default constructor");
 	}
 
@@ -79,10 +79,7 @@ class DeserializerNode {
 private:
 	Deserializer&    serializer;
 	std::vector<int> index;
-	int32_t          startPoint;
 	Json::Value&     node;
-	bool             available;
-	int32_t          size;
 	NodePath         nodePath;
 
 public:
@@ -111,7 +108,7 @@ struct DeserializerAdapter {
 class Deserializer {
 	Json::Value node;
 
-	DeserializerNodeInput rootNode {*this, node, -1, {}};
+	DeserializerNodeInput rootNode {*this, node, true, {}};
 
 	struct KnownAddress {
 		void const* ptr;

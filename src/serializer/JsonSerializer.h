@@ -72,7 +72,6 @@ class SerializerNode {
 private:
 	Serializer&      serializer;
 	std::vector<int> index;
-	int              startPoint;
 	Json::Value&     node;
 	NodePath         nodePath;
 
@@ -278,7 +277,7 @@ void SerializerDefault<T>::setDefault(T2 const& t) {
 
 template<typename T>
 template<typename T2, typename std::enable_if<not std::is_copy_constructible<T2>::value>::type*>
-void SerializerDefault<T>::setDefault(T2 const& t) {
+void SerializerDefault<T>::setDefault(T2 const&) {
 }
 
 
