@@ -6,9 +6,9 @@ namespace serializer {
 namespace json {
 
 SerializerNodeInput::SerializerNodeInput(Serializer& _serializer, std::string const& _name, Json::Value& _node, NodePath const& _nodePath)
-	: serializer { _serializer }
+	: serializer ( _serializer )
 	, name       { _name }
-	, node       { _node }
+	, node       ( _node )
 	, nodePath   { _nodePath }
 {
 }
@@ -16,8 +16,8 @@ SerializerNodeInput::SerializerNodeInput(Serializer& _serializer, std::string co
 
 
 SerializerNode::SerializerNode(Serializer& _serializer, Json::Value& _node, NodePath const& _nodePath)
-	: serializer { _serializer }
-	, node       { _node }
+	: serializer ( _serializer )
+	, node       ( _node )
 	, nodePath   { _nodePath }
 {
 }

@@ -27,8 +27,8 @@ private:
 
 public:
 	DeserializerDefault(Deserializer& _serializer, T& _value, bool _available, bool _needToKnowAddress)
-		: serializer { _serializer }
-		, value      { _value }
+		: serializer ( _serializer )
+		, value      ( _value )
 		, available  { _available }
 		, defaultValue { false }
 		, needToKnowAddress { _needToKnowAddress }
@@ -62,7 +62,7 @@ private:
 	bool          needToKnowAddress;
 public:
 	DeserializerNodeInput(Deserializer& _serializer, bool _available, bool _needToKnowAddress)
-		: serializer { _serializer }
+		: serializer ( _serializer )
 		, available  { _available}
 		, needToKnowAddress { _needToKnowAddress }
 	{
@@ -90,7 +90,7 @@ struct DeserializerAdapter {
 	Deserializer& serializer;
 	bool          needToKnowAddress;
 	DeserializerAdapter(Deserializer& _serializer, bool _needToKnowAddress)
-		: serializer        { _serializer }
+		: serializer        ( _serializer )
 		, needToKnowAddress { _needToKnowAddress }
 	{}
 

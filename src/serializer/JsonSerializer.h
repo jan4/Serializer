@@ -26,11 +26,11 @@ private:
 
 public:
 	SerializerDefault(Serializer& _serializer, std::string const& _name, Json::Value& _node, T& _value, NodePath const& _nodePath)
-		: serializer { _serializer  }
+		: serializer ( _serializer  )
 		, name       { _name }
-		, node       { _node }
+		, node       ( _node )
 		, defaultValueGiven { false }
-		, value      { _value }
+		, value      ( _value )
 		, nodePath   { _nodePath }
 	{ }
 	~SerializerDefault();
@@ -86,8 +86,8 @@ struct SerializerAdapter {
 	Json::Value& node;
 	NodePath     nodePath;
 	SerializerAdapter(Serializer& _serializer, Json::Value& _node, NodePath const& _nodePath)
-		: serializer { _serializer }
-		, node       { _node }
+		: serializer ( _serializer )
+		, node       ( _node )
 		, nodePath   { _nodePath }
 	{}
 

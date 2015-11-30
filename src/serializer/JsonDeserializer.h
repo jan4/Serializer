@@ -28,9 +28,9 @@ private:
 
 public:
 	DeserializerDefault(Deserializer& _serializer, T& _value, Json::Value& _node, bool _available, NodePath const& _nodePath)
-		: serializer { _serializer }
-		, value      { _value }
-		, node       { _node }
+		: serializer ( _serializer )
+		, value      ( _value )
+		, node       ( _node )
 		, available  { _available }
 		, defaultValue { false }
 		, nodePath   { _nodePath }
@@ -64,8 +64,8 @@ private:
 	NodePath      nodePath;
 public:
 	DeserializerNodeInput(Deserializer& _serializer, Json::Value& _node, bool _available, NodePath const& _nodePath)
-		: serializer { _serializer }
-		, node       { _node }
+		: serializer ( _serializer )
+		, node       ( _node )
 		, available  { _available}
 		, nodePath   { _nodePath }
 	{
@@ -93,8 +93,8 @@ struct DeserializerAdapter {
 	Json::Value&  node;
 	NodePath      nodePath;
 	DeserializerAdapter(Deserializer& _serializer, Json::Value& _node, NodePath const& _nodePath)
-		: serializer { _serializer }
-		, node       { _node }
+		: serializer ( _serializer )
+		, node       ( _node )
 		, nodePath   { _nodePath }
 	{}
 

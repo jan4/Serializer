@@ -6,7 +6,7 @@ namespace serializer {
 namespace binary {
 
 SerializerNodeInput::SerializerNodeInput(Serializer& _serializer, int _id, bool _needToKnowAddress)
-	: serializer { _serializer }
+	: serializer ( _serializer )
 	, id         { _id }
 	, needToKnowAddress { _needToKnowAddress }
 {
@@ -15,7 +15,7 @@ SerializerNodeInput::SerializerNodeInput(Serializer& _serializer, int _id, bool 
 
 
 SerializerNode::SerializerNode(Serializer& _serializer, bool _needToKnowAddress)
-	: serializer { _serializer }
+	: serializer ( _serializer )
 	, needToKnowAddress { _needToKnowAddress }
 {
 	serializer.serialize(int32_t(), false);

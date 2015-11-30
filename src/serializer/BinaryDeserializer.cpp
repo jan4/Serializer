@@ -3,7 +3,7 @@ namespace serializer {
 namespace binary {
 
 DeserializerNode::DeserializerNode(Deserializer& _serializer, bool _available, bool _needToKnowAddress)
-	: serializer { _serializer }
+	: serializer ( _serializer )
 	, available  { _available }
 	, needToKnowAddress { _needToKnowAddress }
 {

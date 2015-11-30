@@ -18,9 +18,9 @@ private:
 
 public:
 	SerializerDefault(Serializer& _serializer, int32_t _id, T& _value, bool _needToKnowAddress)
-		: serializer { _serializer  }
+		: serializer ( _serializer  )
 		, id         { _id }
-		, value      { _value }
+		, value      ( _value )
 		, needToKnowAddress { _needToKnowAddress }
 	{
 	}
@@ -59,7 +59,7 @@ struct SerializerAdapter {
 	bool needToKnowAddress;
 
 	SerializerAdapter(Serializer& _serializer, bool _needToKnowAddress)
-		: serializer        { _serializer }
+		: serializer        ( _serializer )
 		, needToKnowAddress { _needToKnowAddress }
 	{}
 

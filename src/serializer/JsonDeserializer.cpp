@@ -8,8 +8,8 @@ namespace serializer {
 namespace json {
 
 DeserializerNode::DeserializerNode(Deserializer& _serializer, Json::Value& _node, bool _available, NodePath const& _nodePath)
-	: serializer { _serializer }
-	, node       { _node }
+	: serializer ( _serializer )
+	, node       ( _node )
 	, nodePath   { _nodePath }
 {
 	(void)_available; // Unused
