@@ -21,8 +21,8 @@ namespace serializer {
 		template<typename Adapter>
 		static void deserialize(Adapter& adapter, std::vector<T>& x) {
 			x.clear();
-			std::function<void(T const&)> func = [&x](T const& v) {
-				x.push_back(v);
+			std::function<void(T&)> func = [&x](T& v) {
+				x.emplace_back(std::move(v));
 			};
 			adapter.deserializeByInsert(func);
 		}
@@ -38,7 +38,7 @@ namespace serializer {
 		template<typename Adapter>
 		static void deserialize(Adapter& adapter, std::list<T>& x) {
 			x.clear();
-			std::function<void(T const&)> func = [&x](T const& v) {
+			std::function<void(T&)> func = [&x](T& v) {
 				x.push_back(v);
 			};
 			adapter.deserializeByInsert(func);
@@ -55,7 +55,7 @@ namespace serializer {
 		template<typename Adapter>
 		static void deserialize(Adapter& adapter, std::set<T>& x) {
 			x.clear();
-			std::function<void(T const&)> func = [&x](T const& v) {
+			std::function<void(T&)> func = [&x](T& v) {
 				x.insert(v);
 			};
 			adapter.deserializeByInsert(func);
@@ -96,8 +96,8 @@ namespace serializer {
 		template<typename Adapter>
 		static void deserialize(Adapter& adapter, std::map<Key, Value>& x) {
 			x.clear();
-			std::function<void(std::pair<Key, Value> const&)> func = [&x]
-			(std::pair<Key, Value> const& v) {
+			std::function<void(std::pair<Key, Value>&)> func = [&x]
+			(std::pair<Key, Value>& v) {
 				x.insert(v);
 			};
 			adapter.deserializeByInsert(func);
@@ -125,39 +125,46 @@ namespace serializer {
 	class Converter<std::unique_ptr<T>> {
 	public:
 		struct SerUPtr {
-			std::unique_ptr<T>& ptr;
+			SerUPtr() : ptr {nullptr} {}
+			SerUPtr(std::unique_ptr<T>* _ptr)
+				: ptr (_ptr) {}
+
+			std::unique_ptr<T>* ptr;
 			template<typename Node>
 			void serialize(Node& node) {
-				bool valid = ptr.get() != nullptr;
+				bool valid = ptr != nullptr;
 				node["valid"] % valid;
 				if (valid) {
-					node["data"] % *(ptr.get());
+					node["data"] % *(ptr->get());
 				}
 			}
 		};
 		struct DeserUPtr {
-			std::unique_ptr<T>& ptr;
+			DeserUPtr() : ptr {nullptr} {}
+			DeserUPtr(std::unique_ptr<T>* _ptr)
+				: ptr (_ptr) {}
+			std::unique_ptr<T>* ptr;
 			template<typename Node>
 			void serialize(Node& node) {
 				bool valid;
 				node["valid"] % valid;
 				if (valid) {
-					ptr.reset(new T{});
-					node["data"] % *(ptr.get());
+					ptr->reset(new T{});
+					node["data"] % *(ptr->get());
 				} else {
-					ptr.reset();
+					ptr->reset();
 				}
 			}
 		};
 
 		template<typename Adapter>
 		static void serialize(Adapter& adapter, std::unique_ptr<T>& x) {
-			SerUPtr ptr {x};
+			SerUPtr ptr (&x);
 			adapter.serialize(ptr);
 		}
 		template<typename Adapter>
 		static void deserialize(Adapter& adapter, std::unique_ptr<T>& x) {
-			DeserUPtr ptr {x};
+			DeserUPtr ptr (&x);
 			adapter.deserialize(ptr);
 		}
 	};

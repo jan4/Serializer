@@ -37,22 +37,29 @@ public:
 	{ }
 	~DeserializerDefault();
 
-	template<typename T2, typename std::enable_if<std::is_default_constructible<T2>::value>::type* = nullptr>
+	template<typename T2, typename std::enable_if<std::is_default_constructible<T2>::value
+	                                              and std::is_assignable<T2, T2>::value>::type* = nullptr>
 	void getDefault(T2& _value) const {
 		_value = T2();
 	}
-	template<typename T2, typename std::enable_if<not std::is_default_constructible<T2>::value>::type* = nullptr>
+	template<typename T2, typename std::enable_if<not std::is_default_constructible<T2>::value
+	                                              or not std::is_assignable<T2, T2>::value>::type* = nullptr>
 	void getDefault(T2&) const {
 		throw std::runtime_error("trying to construct object without default constructor");
 	}
 
-
-	void operator or(T const& t) {
+	template<typename T2, typename std::enable_if<std::is_assignable<T2, T2>::value>::type* = nullptr>
+	void operator or(T2 const& t) {
 		if (not available) {
 			defaultValue = true;
 			value = t;
 		}
 	}
+	template<typename T2, typename std::enable_if<not std::is_assignable<T2, T2>::value>::type* = nullptr>
+	void operator or(T2 const& t) {
+		throw std::runtime_error("trying to us \"or\" on a not copyable datatype");
+	}
+
 };
 
 
@@ -101,7 +108,7 @@ struct DeserializerAdapter {
 	template<typename T>
 	void deserialize(T& _value);
 	template<typename T>
-	void deserializeByInsert(std::function<void(T const& v)> _func);
+	void deserializeByInsert(std::function<void(T& v)> _func);
 };
 
 
@@ -295,13 +302,13 @@ void DeserializerAdapter::deserialize(T& _value) {
 }
 
 template<typename T>
-void DeserializerAdapter::deserializeByInsert(std::function<void(T const& v)> _func) {
+void DeserializerAdapter::deserializeByInsert(std::function<void(T& v)> _func) {
 	if (not node.isArray()) throw std::runtime_error("expected array: " + node.toStyledString());
 	int32_t index { 0 };
 	for (auto& v : node) {
 		T value;
 		NodePath newNodePath = nodePath;
-		newNodePath.push_back(std::to_string(index++));
+		newNodePath.emplace_back(std::to_string(index++));
 		serializer.deserialize(v, value, newNodePath);
 		_func(value);
 	}

@@ -97,7 +97,7 @@ struct DeserializerAdapter {
 	template<typename T>
 	void deserialize(T& _value);
 	template<typename T>
-	void deserializeByInsert(std::function<void(T const& v)> _func);
+	void deserializeByInsert(std::function<void(T& v)> _func);
 };
 
 
@@ -350,7 +350,7 @@ void DeserializerAdapter::deserialize(T& _value) {
 }
 
 template<typename T>
-void DeserializerAdapter::deserializeByInsert(std::function<void(T const& v)> _func) {
+void DeserializerAdapter::deserializeByInsert(std::function<void(T& v)> _func) {
 	int32_t size;
 	serializer.deserialize(size, needToKnowAddress);
 	for (int i {0}; i < size; ++i) {
