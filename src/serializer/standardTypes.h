@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef ABUILD_GENERICFACTORY
+#include <genericFactory/genericFactory.h>
+#endif
+
 #include "Converter.h"
 
 #include <list>
@@ -121,6 +125,7 @@ namespace serializer {
 		}
 	};
 
+
 	template<typename T>
 	class Converter<std::unique_ptr<T>> {
 	public:
@@ -130,6 +135,7 @@ namespace serializer {
 				: ptr (_ptr) {}
 
 			std::unique_ptr<T>* ptr;
+#ifndef ABUILD_GENERICFACTORY
 			template<typename Node>
 			void serialize(Node& node) {
 				bool valid = ptr != nullptr;
@@ -138,12 +144,27 @@ namespace serializer {
 					node["data"] % *(ptr->get());
 				}
 			}
+#else
+			template<typename Node>
+			void serialize(Node& node) {
+				bool valid = ptr != nullptr;
+				node["valid"] % valid;
+				if (valid) {
+					auto type = genericFactory::GenericFactory::getInstance().getType(ptr->get());
+					node["type"] % type;
+					node["data"] % *(ptr->get());
+				}
+			}
+
+#endif
 		};
 		struct DeserUPtr {
 			DeserUPtr() : ptr {nullptr} {}
 			DeserUPtr(std::unique_ptr<T>* _ptr)
 				: ptr (_ptr) {}
 			std::unique_ptr<T>* ptr;
+
+#ifndef ABUILD_GENERICFACTORY
 			template<typename Node>
 			void serialize(Node& node) {
 				bool valid;
@@ -155,6 +176,36 @@ namespace serializer {
 					ptr->reset();
 				}
 			}
+#else
+			template<typename T2, typename std::enable_if<std::is_default_constructible<T2>::value>::type* = nullptr>
+			T2* getDefault() {
+				return new T2();
+			}
+			template<typename T2, typename std::enable_if<not std::is_default_constructible<T2>::value>::type* = nullptr>
+			T2* getDefault() {
+				return nullptr;
+			}
+
+			template<typename Node>
+			void serialize(Node& node) {
+				bool valid;
+				node["valid"] % valid;
+				if (valid) {
+					std::string type;
+					node["type"] % type;
+					if (type != "" and genericFactory::getClassList<T>().count(type) > 0) {
+						*ptr = genericFactory::make_unique<T>(type);
+					} else {
+						ptr->reset(getDefault<T>());
+					}
+					if (*ptr) {
+						node["data"] % *(ptr->get());
+					}
+				} else {
+					ptr->reset();
+				}
+			}
+#endif
 		};
 
 		template<typename Adapter>

@@ -11,6 +11,11 @@
 #include <type_traits>
 #include <vector>
 
+#ifdef ABUILD_GENERICFACTORY
+	#include <genericFactory/genericFactory.h>
+#endif
+
+
 namespace serializer {
 namespace binary {
 
@@ -285,7 +290,15 @@ public:
 			addKnownAddress(&_value, 1, sizeof(T), getCurrentPosition(), typeid(T));
 		}
 		DeserializerNode node(*this, true, _needToKnowAddress);
+#ifndef ABUILD_GENERICFACTORY
 		_value.serialize(node);
+#else
+		if (genericFactory::hasType(&_value)) {
+			genericFactory::serialize(&_value, node);
+		} else {
+			_value.serialize(node);
+		}
+#endif
 	}
 	template<typename T>
 	void deserialize(T*& _value, bool _needToKnowAddress) {

@@ -9,6 +9,11 @@
 #include "Converter.h"
 #include "has_serialize_function.h"
 
+#ifdef ABUILD_GENERICFACTORY
+	#include <genericFactory/genericFactory.h>
+#endif
+
+
 namespace serializer {
 namespace json {
 
@@ -150,9 +155,10 @@ public:
 	template<typename T>
 	void getSharedObject(int32_t _ptrId, std::shared_ptr<T>& _value) {
 		if (idToShared.find(_ptrId) == idToShared.end()) {
-			std::shared_ptr<T> value = std::make_shared<T>();
-			deserialize(sharedObjectNode[_ptrId], *value.get(), {"__sharedObjects"});
-			idToShared[_ptrId] = value;
+			// Extrem hacky!!! casting shared object to unique to use it's serialization
+			std::unique_ptr<T> value;
+			deserialize(sharedObjectNode[_ptrId], value, {"__sharedObjects"});
+			idToShared[_ptrId] = std::shared_ptr<T>(value.release());
 		}
 		_value = std::static_pointer_cast<T, void>(idToShared.at(_ptrId));
 	}
@@ -245,7 +251,15 @@ public:
 		addKnownAddress(&_value, _nodePath);
 
 		DeserializerNode node(*this, _node, true, _nodePath);
+#ifndef ABUILD_GENERICFACTORY
 		_value.serialize(node);
+#else
+		if (genericFactory::hasType(&_value)) {
+			genericFactory::serialize(&_value, node);
+		} else {
+			_value.serialize(node);
+		}
+#endif
 	}
 
 	template<typename T>

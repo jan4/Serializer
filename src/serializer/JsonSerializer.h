@@ -7,6 +7,10 @@
 #include "JsonDeserializer.h"
 #include "standardTypes.h"
 
+#ifdef ABUILD_GENERICFACTORY
+	#include <genericFactory/genericFactory.h>
+#endif
+
 
 namespace serializer {
 namespace json {
@@ -123,6 +127,9 @@ class Serializer {
 	std::map<void const*, int32_t> sharedToId;
 
 public:
+	Serializer() {
+		node = Json::objectValue;
+	}
 	void close();
 
 	std::vector<uint8_t> getData() const {
@@ -159,7 +166,11 @@ public:
 			sharedToId[_value.get()] = id;
 			sharedObjectNode.append(Json::Value{});
 			Json::Value value;
-			serialize(value, *_value, {"__sharedObjects"});
+
+			// Extrem hacky!!! casting shared object to unique to use it's serialization
+			std::unique_ptr<T> ptr (_value.get());
+			serialize(value, ptr, {"__sharedObjects"});
+			ptr.release();
 
 			sharedObjectNode[id] = value;
 
@@ -204,7 +215,16 @@ public:
 		addKnownAddress(&_value, _nodePath);
 
 		SerializerNode node(*this, _node, _nodePath);
+
+#ifndef ABUILD_GENERICFACTORY
 		_value.serialize(node);
+#else
+		if (genericFactory::hasType(&_value)) {
+			genericFactory::serialize(&_value, node);
+		} else {
+			_value.serialize(node);
+		}
+#endif
 	}
 
 
