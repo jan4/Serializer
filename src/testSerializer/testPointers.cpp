@@ -360,6 +360,8 @@ void fullTestSmartPointers() {
 		TestF<S, D>::run(in, out);
 		EXPECT_EQ(in.a->x, 5);
 		EXPECT_NE(out.a, nullptr);
+		//!TODO
+		//This is not fully implemented for Binary data, this fails
 		EXPECT_EQ(out.a->x, in.a->x);
 	}
 
