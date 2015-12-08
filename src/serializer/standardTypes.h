@@ -149,9 +149,11 @@ namespace serializer {
 			void serialize(Node& node) {
 				bool valid = ptr != nullptr;
 				node["valid"] % valid;
-				if (valid) {
+				if (valid && genericFactory::hasType(ptr->get())) {
 					auto type = genericFactory::GenericFactory::getInstance().getType(ptr->get());
 					node["type"] % type;
+					node["data"] % *(ptr->get());
+				} else {
 					node["data"] % *(ptr->get());
 				}
 			}
