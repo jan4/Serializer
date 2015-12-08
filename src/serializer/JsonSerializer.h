@@ -11,6 +11,7 @@
 	#include <genericFactory/genericFactory.h>
 #endif
 
+#include "is_copy_constructible_recursive.h"
 
 namespace serializer {
 namespace json {
@@ -43,10 +44,10 @@ public:
 		setDefault(t);
 	}
 
-	template<typename T2, typename std::enable_if<std::is_copy_constructible<T2>::value>::type* = nullptr>
+	template<typename T2, typename std::enable_if<is_copy_constructible_recursive<T2>::value>::type* = nullptr>
 	void setDefault(T2 const& t);
 
-	template<typename T2, typename std::enable_if<not std::is_copy_constructible<T2>::value>::type* = nullptr>
+	template<typename T2, typename std::enable_if<not is_copy_constructible_recursive<T2>::value>::type* = nullptr>
 	void setDefault(T2 const& t);
 
 	template<typename T2, typename std::enable_if<std::is_default_constructible<T2>::value
@@ -284,11 +285,11 @@ SerializerDefault<T>::~SerializerDefault() {
 	}
 }
 template<typename T>
-template<typename T2, typename std::enable_if<std::is_copy_constructible<T2>::value>::type*>
+template<typename T2, typename std::enable_if<is_copy_constructible_recursive<T2>::value>::type*>
 void SerializerDefault<T>::setDefault(T2 const& t) {
 	try {
 		Serializer ser;
-		T p = t;
+		T p (t);
 		ser.getRootNode() % p;
 		ser.close();
 		defaultNode = ser.getNode();
@@ -298,7 +299,7 @@ void SerializerDefault<T>::setDefault(T2 const& t) {
 }
 
 template<typename T>
-template<typename T2, typename std::enable_if<not std::is_copy_constructible<T2>::value>::type*>
+template<typename T2, typename std::enable_if<not is_copy_constructible_recursive<T2>::value>::type*>
 void SerializerDefault<T>::setDefault(T2 const&) {
 }
 

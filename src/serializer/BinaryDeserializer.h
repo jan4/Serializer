@@ -41,22 +41,30 @@ public:
 
 	~DeserializerDefault();
 
-	template<typename T2, typename std::enable_if<std::is_default_constructible<T2>::value>::type* = nullptr>
+	template<typename T2, typename std::enable_if<std::is_default_constructible<T2>::value
+	                                              and std::is_assignable<T2, T2>::value>::type* = nullptr>
 	void getDefault(T2& _value) const {
 		_value = T2();
 	}
-	template<typename T2, typename std::enable_if<not std::is_default_constructible<T2>::value>::type* = nullptr>
+	template<typename T2, typename std::enable_if<not std::is_default_constructible<T2>::value
+	                                              or not std::is_assignable<T2, T2>::value>::type* = nullptr>
 	void getDefault(T2& _value) const {
 		throw std::runtime_error("trying to construct object without default constructor");
 	}
 
 
-	void operator or(T const& t) {
+	template<typename T2, typename std::enable_if<std::is_assignable<T2, T2>::value>::type* = nullptr>
+	void operator or(T2 const& t) {
 		if (not available) {
 			defaultValue = true;
 			value = t;
 		}
 	}
+	template<typename T2, typename std::enable_if<not std::is_assignable<T2, T2>::value>::type* = nullptr>
+	void operator or(T2 const& t) {
+		throw std::runtime_error("trying to us \"or\" on a not copyable datatype");
+	}
+
 };
 
 
@@ -65,8 +73,7 @@ private:
 	Deserializer& serializer;
 	bool          available;
 	bool          needToKnowAddress;
-public:
-	DeserializerNodeInput(Deserializer& _serializer, bool _available, bool _needToKnowAddress)
+public: DeserializerNodeInput(Deserializer& _serializer, bool _available, bool _needToKnowAddress)
 		: serializer ( _serializer )
 		, available  { _available}
 		, needToKnowAddress { _needToKnowAddress }
