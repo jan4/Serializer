@@ -12,7 +12,7 @@
       {
          "dependencies" : [ "jsoncpp/lib_json" ],
          "optionalDependencies" : [
-            "Armadillo/armadilloBits",
+            "Armadillo/armadillo_bits",
             "GenericFactory/genericFactory",
             "Units/units"
          ],
