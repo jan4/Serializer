@@ -210,7 +210,7 @@ public:
 		addKnownAddress(&_value, _nodePath);
 	}
 	template<typename T, typename std::enable_if<std::is_same<T, std::string>::value>::type* = nullptr>
-	void serialize(YAML::Node& _node, T& _value, NodePath const& _nodePath) {
+	void serialize(YAML::Node& _node, T const& _value, NodePath const& _nodePath) {
 		_node = _value;
 
 		addKnownAddress(&_value, _nodePath);

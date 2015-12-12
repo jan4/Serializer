@@ -194,17 +194,17 @@ public:
 		addKnownAddress(&_value, _nodePath);
 	}
 	template<typename T, typename std::enable_if<std::is_same<T, int64_t>::value>::type* = nullptr>
-	void serialize(Json::Value& _node, T& _value, NodePath const& _nodePath) {
+	void serialize(Json::Value& _node, T const& _value, NodePath const& _nodePath) {
 		_node = Json::Value::Int64(_value);
 		addKnownAddress(&_value, _nodePath);
 	}
 	template<typename T, typename std::enable_if<std::is_same<T, uint64_t>::value>::type* = nullptr>
-	void serialize(Json::Value& _node, T& _value, NodePath const& _nodePath) {
+	void serialize(Json::Value& _node, T const& _value, NodePath const& _nodePath) {
 		_node = Json::Value::UInt64(_value);
 		addKnownAddress(&_value, _nodePath);
 	}
 	template<typename T, typename std::enable_if<std::is_same<T, std::string>::value>::type* = nullptr>
-	void serialize(Json::Value& _node, T& _value, NodePath const& _nodePath) {
+	void serialize(Json::Value& _node, T const& _value, NodePath const& _nodePath) {
 		_node = _value;
 
 		addKnownAddress(&_value, _nodePath);
