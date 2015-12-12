@@ -288,8 +288,13 @@ SerializerDefault<T>::~SerializerDefault() {
 		setDefault<T>();
 	}
 
-	if (defaultValueGiven and node[name] == defaultNode) {
-		node.remove(name);
+	if (defaultValueGiven) {
+		YAML::Emitter em1, em2;
+		em1 << node[name];
+		em2 << defaultNode;
+		if (strcmp(em1.c_str(), em2.c_str()) == 0) {
+			node.remove(name);
+		}
 	}
 }
 template<typename T>
