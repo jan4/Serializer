@@ -1,6 +1,6 @@
 #pragma once
 
-#include "BinaryDeserializer.h"
+#include "Deserializer.h"
 
 #ifdef ABUILD_GENERICFACTORY
 	#include <genericFactory/genericFactory.h>

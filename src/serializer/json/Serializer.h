@@ -4,14 +4,14 @@
 #include <fstream>
 #include <sstream>
 
-#include "JsonDeserializer.h"
-#include "standardTypes.h"
+#include "Deserializer.h"
+#include <serializer/standardTypes.h>
 
 #ifdef ABUILD_GENERICFACTORY
 	#include <genericFactory/genericFactory.h>
 #endif
 
-#include "is_copy_constructible_recursive.h"
+#include <serializer/is_copy_constructible_recursive.h>
 
 namespace serializer {
 namespace json {

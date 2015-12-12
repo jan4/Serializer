@@ -1,7 +1,7 @@
 #pragma once
 
-#include "BinarySerializer.h"
-#include "JsonSerializer.h"
+#include "binary/Serializer.h"
+#include "json/Serializer.h"
 #include "standardTypes.h"
 
 #ifdef ABUILD_UNITS

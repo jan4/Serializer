@@ -1,4 +1,5 @@
-#include "BinaryDeserializer.h"
+#include "Deserializer.h"
+
 namespace serializer {
 namespace binary {
 

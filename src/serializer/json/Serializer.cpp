@@ -1,6 +1,4 @@
-#include "JsonSerializer.h"
-
-#include "standardTypes.h"
+#include "Serializer.h"
 
 namespace serializer {
 namespace json {
