@@ -10,6 +10,8 @@ public:
 		bs1.getRootNode() % _in;
 		bs1.close();
 
+//		std::cout << "yaml:\n" << bs1.getDataAsStr() << std::endl;
+
 		T2 bs2 (bs1.getData());
 
 		bs2.getRootNode() % _out;
@@ -20,7 +22,7 @@ public:
 		In _out;
 		run(_in, _out);
 		EXPECT_EQ(_in, _out);
-		if (_in != _out) throw "";
+//		if (_in != _out) throw "";
 	}
 
 };
@@ -29,6 +31,8 @@ using SB = serializer::binary::Serializer;
 using DB = serializer::binary::Deserializer;
 using SJ = serializer::json::Serializer;
 using DJ = serializer::json::Deserializer;
+using SY = serializer::yaml::Serializer;
+using DY = serializer::yaml::Deserializer;
 
 template<typename S, typename D, typename T>
 void testLimits(T const& _value) {
@@ -262,9 +266,11 @@ void fullTestClasses() {
 TEST(TestPrimitiveDataTypes, TestFundamentals) {
 	fullTestFundamentals<SB, DB>();
 	fullTestFundamentals<SJ, DJ>();
+	fullTestFundamentals<SY, DY>();
 }
 TEST(TestPrimitiveDataTypes, TestClasses) {
 	fullTestClasses<SB, DB>();
 	fullTestClasses<SJ, DJ>();
+	fullTestClasses<SY, DY>();
 }
 

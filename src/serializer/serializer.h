@@ -2,6 +2,8 @@
 
 #include "binary/Serializer.h"
 #include "json/Serializer.h"
+#include "yaml/Serializer.h"
+
 #include "standardTypes.h"
 
 #ifdef ABUILD_UNITS
