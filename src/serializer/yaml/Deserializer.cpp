@@ -21,7 +21,8 @@ DeserializerNode::~DeserializerNode() {
 DeserializerNodeInput DeserializerNode::operator[](std::string const& _str) {
 	NodePath newNodePath = nodePath;
 	newNodePath.push_back(_str);
-	if (not node.IsMap() or node[_str].IsNull() or not node[_str].IsDefined()) {
+
+	if (not node.IsMap() or not node[_str].IsDefined()) {
 		return DeserializerNodeInput(serializer, node, false, newNodePath);
 	}
 
@@ -37,7 +38,7 @@ Deserializer::Deserializer(std::vector<uint8_t> const& _data) {
 }
 Deserializer::Deserializer(std::string const& _data) {
 	node = YAML::Load(_data);
-	if (node.IsMap() and not node["__sharedObjects"].IsNull()) {
+	if (node.IsMap() and not node["__sharedObjects"].IsNull() and node["__sharedObjects"].IsDefined()) {
 		sharedObjectNode = node["__sharedObjects"];
 	}
 }
@@ -46,7 +47,7 @@ void Deserializer::close() {
 	// Check if ownerless objects (raw pointers table) are available
 	std::map<int32_t, std::vector<NodePath>> nodePaths;
 
-	if (node.IsMap() and not node["__ownerlessObjects"].IsNull()) {
+	if (node.IsMap() and not node["__ownerlessObjects"].IsNull() and node["__ownerlessObjects"].IsDefined()) {
 		YAML::Node values = node["__ownerlessObjects"];
 		deserialize(values, nodePaths, {"__ownerlessObjects"});
 	}

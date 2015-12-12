@@ -175,6 +175,10 @@ public:
 		return buffer;
 	}
 
+	std::string getDataAsStr() const {
+		return "<binary>";
+	}
+
 	void addKnownAddress(void const* _ptr, int32_t  _count, int32_t _size, int32_t _bufferPos, std::type_info const& _type_info) {
 		knownAddresses.push_back({_ptr, _count, _size, _type_info, _bufferPos});
 	}

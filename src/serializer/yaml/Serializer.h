@@ -25,7 +25,6 @@ private:
 	std::string  name;
 	YAML::Node&  node;
 	YAML::Node   defaultNode;
-
 	bool         defaultValueGiven;
 	T&           value;
 	NodePath     nodePath;
@@ -284,6 +283,7 @@ SerializerDefault<T>::~SerializerDefault() {
 
 	auto tnode = node[name];
 	serializer.serialize(tnode, value, nodePath);
+
 	if (not defaultValueGiven) {
 		setDefault<T>();
 	}
@@ -292,6 +292,7 @@ SerializerDefault<T>::~SerializerDefault() {
 		YAML::Emitter em1, em2;
 		em1 << node[name];
 		em2 << defaultNode;
+
 		if (strcmp(em1.c_str(), em2.c_str()) == 0) {
 			node.remove(name);
 		}
@@ -330,8 +331,6 @@ void SerializerAdapter::serialize(T& _value) {
 
 template<typename Iter>
 void SerializerAdapter::serializeByIter(Iter iter, Iter end) {
-	//node = Json::Value(Json::arrayValue);
-	//!TODO node should be initialized as array?
 	int32_t index { 0 };
 	for (; iter != end; ++iter) {
 		auto newNodePath = nodePath;
@@ -341,12 +340,13 @@ void SerializerAdapter::serializeByIter(Iter iter, Iter end) {
 		serializer.serialize(tnode, *iter, newNodePath);
 		node.push_back(tnode);
 	}
+	if (index == 0) { // No enty in the list, print at least empty list
+		node.SetStyle(YAML::EmitterStyle::Flow);
+	}
 }
 
 template<typename Iter>
 void SerializerAdapter::serializeByIterCopy(Iter iter, Iter end) {
-	//node = Json::Value(Json::arrayValue);
-	//!TODO node should be initalized as array?
 	int32_t index { 0 };
 	for (; iter != end; ++iter) {
 		auto newNodePath = nodePath;
@@ -354,7 +354,7 @@ void SerializerAdapter::serializeByIterCopy(Iter iter, Iter end) {
 
 		YAML::Node tnode;
 		auto t = *iter;
-		serializer.serialize(tnode, t, newNodePath);
+		serializer.serialize(tnode, *iter, newNodePath);
 		node.push_back(tnode);
 	}
 }

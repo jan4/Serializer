@@ -1,45 +1,12 @@
 #include <serializer/serializer.h>
 #include <gtest/gtest.h>
 
-template<typename T1, typename T2>
-class TestF {
-public:
-	template<typename In, typename Out>
-	static void run(In _in, Out& _out) {
-		T1 bs1;
-		bs1.getRootNode() % _in;
-		bs1.close();
-
-//		std::cout << "yaml:\n" << bs1.getDataAsStr() << std::endl;
-
-		T2 bs2 (bs1.getData());
-
-		bs2.getRootNode() % _out;
-		bs2.close();
-	}
-	template<typename In>
-	static void runEQ(In const& _in) {
-		In _out;
-		run(_in, _out);
-		EXPECT_EQ(_in, _out);
-//		if (_in != _out) throw "";
-	}
-
-};
-
 using SB = serializer::binary::Serializer;
 using DB = serializer::binary::Deserializer;
 using SJ = serializer::json::Serializer;
 using DJ = serializer::json::Deserializer;
 using SY = serializer::yaml::Serializer;
 using DY = serializer::yaml::Deserializer;
-
-template<typename S, typename D, typename T>
-void testLimits(T const& _value) {
-	TestF<S, D>::runEQ(_value);
-	TestF<S, D>::runEQ(std::numeric_limits<T>::min());
-	TestF<S, D>::runEQ(std::numeric_limits<T>::max());
-}
 
 struct A {
 	int32_t x;
@@ -153,6 +120,74 @@ struct List12_nested2 {
 };
 
 
+template<typename T1, typename T2>
+class TestF {
+public:
+	template<typename In, typename Out>
+	static void run(In _in, Out& _out) {
+		T1 bs1;
+		bs1.getRootNode() % _in;
+		bs1.close();
+
+//		std::cout << "yaml:\n" << bs1.getDataAsStr() << std::endl;
+
+		T2 bs2 (bs1.getData());
+
+		bs2.getRootNode() % _out;
+		bs2.close();
+
+/*		List12& in  = _in;
+		List12& out = _out;
+		std::cout<<"in list: "<< in.list.size() << std::endl;
+		for (auto const& l : in.list) {
+			std::cout << "  " << l << std::endl;
+		}
+
+		std::cout<<"out list: "<< out.list.size() << std::endl;
+		for (auto const& l : out.list) {
+			std::cout << "  " << l << std::endl;
+		}*/
+
+
+/*		List12_nested& in  = _in;
+		List12_nested& out = _out;
+		std::cout<<"in list: "<< in.list.size() << std::endl;
+		for (auto const& l : in.list) {
+			std::cout << " list 2: " << l.list.size()<< std::endl;
+			for (auto const& l2 : l.list) {
+				std::cout << "  " << l2 << std::endl;
+			}
+		}
+
+		std::cout<<"out list: "<< out.list.size() << std::endl;
+		for (auto const& l : out.list) {
+			std::cout << " list 2: " << l.list.size()<< std::endl;
+			for (auto const& l2 : l.list) {
+				std::cout << "  " << l2 << std::endl;
+			}
+		}*/
+
+	}
+	template<typename In>
+	static void runEQ(In const& _in) {
+		In _out;
+		run(_in, _out);
+		EXPECT_EQ(_in, _out);
+		if (_in != _out) throw "";
+	}
+
+};
+
+template<typename S, typename D, typename T>
+void testLimits(T const& _value) {
+	TestF<S, D>::runEQ(_value);
+	TestF<S, D>::runEQ(std::numeric_limits<T>::min());
+	TestF<S, D>::runEQ(std::numeric_limits<T>::max());
+}
+
+
+
+
 
 
 template<typename S, typename D>
@@ -259,7 +294,6 @@ void fullTestClasses() {
 	TestF<S, D>::runEQ(List12_nested2{{}});
 	TestF<S, D>::runEQ(List12_nested2{{List12{{1, 2}}}});
 	TestF<S, D>::runEQ(List12_nested2{{List12{{1, 2}}, List12{{1, 2}}}});
-
 }
 
 
