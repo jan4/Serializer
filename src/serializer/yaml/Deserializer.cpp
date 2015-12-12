@@ -21,12 +21,11 @@ DeserializerNode::~DeserializerNode() {
 DeserializerNodeInput DeserializerNode::operator[](std::string const& _str) {
 	NodePath newNodePath = nodePath;
 	newNodePath.push_back(_str);
-	if (not node.IsMap() or node[_str].IsNull()) {
+	if (not node.IsMap() or node[_str].IsNull() or not node[_str].IsDefined()) {
 		return DeserializerNodeInput(serializer, node, false, newNodePath);
 	}
 
 	_nodes.push_back(node[_str]);
-//	auto tnode = node[_str];
 	return DeserializerNodeInput(serializer, _nodes.back(), true, newNodePath);
 }
 
