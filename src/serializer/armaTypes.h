@@ -18,9 +18,10 @@ namespace serializer {
 				rows = _mat.n_rows;
 				cols = _mat.n_cols;
 				values.resize(rows * cols);
+				auto iter = values.begin();
 				for (int r (0); r < rows; ++r) {
 					for (int c (0); c < cols; ++c) {
-						values.push_back(_mat(r, c));
+						*iter++ = _mat(r, c);
 					}
 				}
 			}
