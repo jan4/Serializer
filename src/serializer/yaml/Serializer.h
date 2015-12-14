@@ -357,6 +357,10 @@ void SerializerAdapter::serializeByIterCopy(Iter iter, Iter end) {
 		serializer.serialize(tnode, *iter, newNodePath);
 		node.push_back(tnode);
 	}
+
+	if (index == 0) { // No enty in the list, print at least empty list
+		node.SetStyle(YAML::EmitterStyle::Flow);
+	}
 }
 
 
