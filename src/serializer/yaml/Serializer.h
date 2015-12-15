@@ -107,6 +107,20 @@ struct SerializerAdapter {
 	template<typename Iter>
 	void serializeByIterCopy(Iter iter, Iter end);
 
+	template<typename T>
+	static constexpr bool isSimpleType() {
+		using NR = typename std::remove_reference<T>::type;
+		return std::is_same<NR, bool>::value
+		       or std::is_same<NR, uint8_t>::value
+		       or std::is_same<NR, int8_t>::value
+		       or std::is_same<NR, uint16_t>::value
+		       or std::is_same<NR, int16_t>::value
+		       or std::is_same<NR, uint32_t>::value
+		       or std::is_same<NR, int32_t>::value
+		       or std::is_same<NR, float>::value
+		       or std::is_same<NR, double>::value;
+	}
+
 };
 
 
@@ -340,7 +354,7 @@ void SerializerAdapter::serializeByIter(Iter iter, Iter end) {
 		serializer.serialize(tnode, *iter, newNodePath);
 		node.push_back(tnode);
 	}
-	if (index == 0) { // No enty in the list, print at least empty list
+	if (index == 0 or isSimpleType<decltype(*iter)>()) { // No enty in the list, print at least empty list
 		node.SetStyle(YAML::EmitterStyle::Flow);
 	}
 }
@@ -358,7 +372,7 @@ void SerializerAdapter::serializeByIterCopy(Iter iter, Iter end) {
 		node.push_back(tnode);
 	}
 
-	if (index == 0) { // No enty in the list, print at least empty list
+	if (index == 0 or isSimpleType<decltype(*iter)>()) { // No enty in the list, print at least empty list
 		node.SetStyle(YAML::EmitterStyle::Flow);
 	}
 }
