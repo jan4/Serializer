@@ -142,8 +142,8 @@ private:
 	std::map<int32_t, std::shared_ptr<void>> idToShared;
 
 public:
-	Deserializer(std::vector<uint8_t> const& _data)
-		: buffer {_data} {
+	Deserializer(std::vector<uint8_t> _data)
+		: buffer {std::move(_data)} {
 
 		int32_t size;
 		deserialize(size, false);

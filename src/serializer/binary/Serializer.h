@@ -2,6 +2,10 @@
 
 #include "Deserializer.h"
 
+#include <fstream>
+#include <sstream>
+
+
 #ifdef ABUILD_GENERICFACTORY
 	#include <genericFactory/genericFactory.h>
 #endif
@@ -372,7 +376,45 @@ void SerializerAdapter::serializeByIterCopy(Iter iter, Iter end) {
 	}
 }
 
+template<typename T>
+void read(std::string const& _file, T& _value) {
 
+	// Read file from storage
+	std::ifstream ifs(_file, std::ios::binary);
+	if (ifs.fail()) {
+		throw std::runtime_error("Opening file failed");
+	}
+
+	ifs.seekg(0, std::ios::end);
+	std::vector<uint8_t> data(ifs.tellg());
+	ifs.seekg(0, std::ios::beg);
+	ifs.read((char*)&data[0], int(data.size()));
+	ifs.close();
+
+   // parse file in serializer
+	Deserializer serializer(std::move(data));
+	serializer.getRootNode() % _value;
+	serializer.close();
+}
+
+template<typename T>
+void write(std::string const& _file, T& _value) {
+	// Serialize data
+	Serializer serializer;
+	serializer.getRootNode() % _value;
+	serializer.close();
+
+	std::ofstream oFile(_file, std::ios::binary);
+	if (oFile.fail()) {
+		throw std::runtime_error("Opening file failed");
+	}
+	auto const& data = serializer.getData();
+	oFile.write((char const*)&data[0], int(data.size()));
+	oFile.close();
+	if (oFile.fail()) {
+		throw std::runtime_error("Writing to file failed");
+	}
+}
 
 
 
