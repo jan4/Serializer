@@ -321,6 +321,7 @@ void fullTest() {
 TEST(TestPointers, TestPointers) {
 	fullTest<SB, DB>();
 	fullTest<SJ, DJ>();
+	fullTest<SY, DY>();
 }
 
 
@@ -363,12 +364,7 @@ void fullTestSmartPointers() {
 		EXPECT_EQ(in.a->x, 5);
 		EXPECT_NE(out.a, nullptr);
 
-		//!TODO
-		//This is not fully implemented for Binary data, this fails
-		if (typeid(S).hash_code() != typeid(SB).hash_code()
-			and typeid(D).hash_code() != typeid(DB).hash_code()) {
-			EXPECT_EQ(out.a->x, in.a->x);
-		}
+		EXPECT_EQ(out.a->x, in.a->x);
 	}
 
 }

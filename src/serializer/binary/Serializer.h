@@ -114,6 +114,34 @@ public:
 	}
 
 	void close() {
+		// Write string index to the end
+		int endPoint = getCurrentPosition();
+		int32_t size = endPoint - startPoint;
+		memcpy(&buffer[startPoint - sizeof(int32_t)], &size, sizeof(size));
+
+		int32_t posOfString = getCurrentPosition();
+		serialize(int32_t(), false);
+		// serialize shared objects
+		int32_t sharedObjectSize = sharedObjectFunctions.size();
+		serialize(sharedObjectSize, false);
+		for (int32_t i {0}; i < int32_t(sharedObjectFunctions.size()); ++i) {
+			serialize(i, false);
+			auto sizePos = getCurrentPosition();
+			serialize(int32_t(), false);
+			sharedObjectFunctions[i]();
+			int32_t size = getCurrentPosition() - sizePos;
+			memcpy(&buffer[sizePos], &size, sizeof(size));
+		}
+
+		memcpy(&buffer[posOfString], &currentPosition, sizeof(int32_t));
+		// serialize string to int
+		int32_t stringSize = int32_t(stringToInt.size());
+		serialize(stringSize, false);
+		for (auto const& e : stringToInt) {
+			serialize(e.second, false);
+			serialize(e.first, false);
+		}
+
 		// Fill all rawpointers
 		for (auto const& raw : rawAddresses) {
 			for (auto const& known : knownAddresses) {
@@ -134,29 +162,8 @@ public:
 		}
 
 
-		// Write string index to the end
-		int endPoint = getCurrentPosition();
-		int32_t size = endPoint - startPoint;
-		memcpy(&buffer[startPoint - sizeof(int32_t)], &size, sizeof(size));
 
-		// serialize string to int
-		int32_t stringSize = int32_t(stringToInt.size());
-		serialize(stringSize, false);
-		for (auto const& e : stringToInt) {
-			serialize(e.second, false);
-			serialize(e.first, false);
-		}
-		// serialize shared objects
-		int32_t sharedObjectSize = sharedObjectFunctions.size();
-		serialize(sharedObjectSize, false);
-		for (int32_t i {0}; i < int32_t(sharedObjectFunctions.size()); ++i) {
-			serialize(i, false);
-			auto sizePos = getCurrentPosition();
-			serialize(int32_t(), false);
-			sharedObjectFunctions[i]();
-			int32_t size = getCurrentPosition() - sizePos;
-			memcpy(&buffer[sizePos], &size, sizeof(size));
-		}
+
 	}
 
 	SerializerNodeInput const& getRootNode() const {
