@@ -4,6 +4,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <queue>
 
 
 #ifdef ABUILD_GENERICFACTORY
@@ -106,7 +107,7 @@ private:
 	};
 	std::vector<RawAddress> rawAddresses;
 
-	std::vector<std::function<void()>> sharedObjectFunctions;
+	std::queue<std::function<void()>> sharedObjectFunctions;
 	std::map<void const*, int32_t> sharedToId;
 
 public:
@@ -126,17 +127,21 @@ public:
 		int32_t posOfString = getCurrentPosition();
 		serialize(int32_t(), false);
 		// serialize shared objects
-		int32_t sharedObjectSize = sharedObjectFunctions.size();
-		serialize(sharedObjectSize, false);
-		for (int32_t i {0}; i < int32_t(sharedObjectFunctions.size()); ++i) {
-			serialize(i, false);
-			auto sizePos = getCurrentPosition();
+		int32_t posSharedObjectSize = getCurrentPosition();
+		serialize(int32_t(), false);
+		int32_t id = 0;
+		while (not sharedObjectFunctions.empty()) {
+			auto func = sharedObjectFunctions.front();
+			sharedObjectFunctions.pop();
+			serialize(id, false);
 			serialize(int32_t(), false);
-			sharedObjectFunctions[i]();
+			auto sizePos = getCurrentPosition();
+			func();
 			int32_t size = getCurrentPosition() - sizePos;
 			memcpy(&buffer[sizePos], &size, sizeof(size));
+			++id;
 		}
-
+		memcpy(&buffer[posSharedObjectSize], &id, sizeof(int32_t));
 		memcpy(&buffer[posOfString], &currentPosition, sizeof(int32_t));
 		// serialize string to int
 		int32_t stringSize = int32_t(stringToInt.size());
@@ -149,7 +154,7 @@ public:
 		// Fill all rawpointers
 		for (auto const& raw : rawAddresses) {
 			for (auto const& known : knownAddresses) {
-				if (raw.type_info != known.type_info) continue;
+				if (raw.type_info.hash_code() != known.type_info.hash_code()) continue;
 				if (raw.ptr < known.ptr) continue;
 				if (raw.ptr >= (uint8_t*)known.ptr + (known.size*known.count)) continue;
 
@@ -159,8 +164,10 @@ public:
 						break;
 					}
 				}
+				// !TODO offset should be saved in a second field
 				int32_t value = known.bufferPos + offset;
-				memcpy(&buffer[raw.bufferPos], &value, sizeof(known.bufferPos));
+				memcpy(&buffer[raw.bufferPos], &value, sizeof(value));
+
 				break;
 			}
 		}
@@ -197,10 +204,15 @@ public:
 	template<typename T>
 	int32_t addSharedObject(std::shared_ptr<T>& _value) {
 		if (sharedToId.find(_value.get()) == sharedToId.end()) {
-			int32_t id = sharedObjectFunctions.size();
+			int32_t id = sharedToId.size();
 			sharedToId[_value.get()] = id;
-			sharedObjectFunctions.push_back([=]() {
-				serialize(*_value.get(), false);
+			sharedObjectFunctions.push([=]() {
+
+				// Extrem hacky!!! casting shared object to unique to use it's serialization
+				std::unique_ptr<T> ptr (_value.get());
+				serialize(ptr, true);
+				ptr.release();
+
 			});
 		}
 		return sharedToId.at(_value.get());

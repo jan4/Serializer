@@ -145,10 +145,13 @@ public:
 	Deserializer(std::vector<uint8_t> _data)
 		: buffer {std::move(_data)} {
 
+		intToString[-1] = "";// Special entry that indicates not found string
+
 		int32_t size;
 		deserialize(size, false);
 		int stack = getCurrentPosition();
 		setCurrentPosition(sizeof(int32_t) + size);
+
 
 		int32_t stringPos;
 		deserialize(stringPos, false);
@@ -175,15 +178,16 @@ public:
 		// Reading shared object positions
 		// serialize shared objects
 		int32_t sharedObjectSize;
+
 		deserialize(sharedObjectSize, false);
-		for (int32_t i {0}; i < int32_t(sharedObjectSize); ++i) {
+		for (int32_t i {0}; i < sharedObjectSize; ++i) {
 			int32_t ptrId;
 			deserialize(ptrId, false);
 			int32_t sizePos;
 			deserialize(sizePos, false);
 			ptrIdToBufferPos[ptrId] = getCurrentPosition();
 
-			setCurrentPosition(getCurrentPosition() + sizePos - sizeof(int32_t));
+			setCurrentPosition(getCurrentPosition() + sizePos);
 		}
 
 		setCurrentPosition(stack);
@@ -192,6 +196,7 @@ public:
 		// Fill all rawpointers
 		for (auto const& raw : rawAddresses) {
 			for (auto const& known : knownAddresses) {
+				if (raw.type_info.hash_code() != known.type_info.hash_code()) continue;
 				if (raw.bufferPos >= known.bufferPos and raw.bufferPos < known.bufferPos + known.size*known.count) {
 					int32_t offset = 0;
 					for (; offset < known.count*known.size; offset += known.size) {
@@ -201,10 +206,10 @@ public:
 					}
 					void* value = (uint8_t*)known.ptr + offset;
 					memcpy(raw.ptr, &value, sizeof(void*));
+					break;
 				}
 			}
 		}
-
 	}
 
 	DeserializerNodeInput const& getRootNode() const {
@@ -216,16 +221,19 @@ public:
 
 	void addKnownAddress(void const* _ptr, int32_t  _count, int32_t _size, int32_t _bufferPos, std::type_info const& _type_info) {
 		knownAddresses.push_back({_ptr, _count, _size, _type_info, _bufferPos});
+
 	}
 
 	template<typename T>
 	void getSharedObject(int32_t _ptrId, std::shared_ptr<T>& _value) {
 		if (idToShared.find(_ptrId) == idToShared.end()) {
-			std::shared_ptr<T> value = std::make_shared<T>();
 			auto currentPos = getCurrentPosition();
+
 			setCurrentPosition(ptrIdToBufferPos.at(_ptrId));
-			deserialize(*value.get(), false);
-			idToShared[_ptrId] = value;
+			std::unique_ptr<T> value;
+			deserialize(value, true);
+			idToShared[_ptrId] = std::shared_ptr<T>(value.release());
+
 			setCurrentPosition(currentPos);
 		}
 		_value = std::static_pointer_cast<T, void>(idToShared.at(_ptrId));
@@ -258,7 +266,10 @@ public:
 	}
 
 	std::string const& mapIntToString(int32_t _index) const {
-		return intToString.at(_index);
+		if (intToString.find(_index) != intToString.end()) {
+			return intToString.at(_index);
+		}
+		return intToString.at(-1);
 	}
 
 	void deserialize(std::string& _str, bool _needToKnowAddress) {
@@ -383,7 +394,7 @@ void DeserializerAdapter::deserializeByInsert(std::function<void(T& v)> _func) {
 	serializer.deserialize(size, needToKnowAddress);
 	for (int i {0}; i < size; ++i) {
 		T value;
-		serializer.deserialize(value, false);
+		serializer.deserialize(value, true);
 		_func(value);
 	}
 }
