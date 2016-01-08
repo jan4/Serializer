@@ -142,9 +142,17 @@ class Serializer {
 
 	std::map<void const*, int32_t> sharedToId;
 
+	bool mNoDefault {false};
+
 public:
 	Serializer() {
 		//node //!TODO needs initialization?
+	}
+	void setNoDefault(bool _noDefault) {
+		mNoDefault = _noDefault;
+	}
+	bool getNoDefault() const {
+		return mNoDefault;
 	}
 	void close();
 
@@ -307,7 +315,8 @@ SerializerDefault<T>::~SerializerDefault() {
 		em1 << node[name];
 		em2 << defaultNode;
 
-		if (strcmp(em1.c_str(), em2.c_str()) == 0) {
+		if (strcmp(em1.c_str(), em2.c_str()) == 0
+		   and not serializer.getNoDefault()) {
 			node.remove(name);
 		}
 	}
@@ -414,7 +423,7 @@ void write(std::string const& _file, T& _value) {
 }
 
 template<typename T>
-std::string writeAsString(T& _value) {
+std::string writeAsString(T& _value, bool noDefault = true) {
 	// Serialize data
 	Serializer serializer;
 	serializer.getRootNode() % _value;
