@@ -413,6 +413,28 @@ void write(std::string const& _file, T& _value) {
 	}
 }
 
+template<typename T>
+std::string writeAsString(T& _value) {
+	// Serialize data
+	Serializer serializer;
+	serializer.getRootNode() % _value;
+	serializer.close();
+
+	return serializer.getDataAsStr();
+}
+
+template<typename T>
+void readFromString(std::string const& _str, T& _value) {
+
+	// parse file in serializer
+	Deserializer serializer(_str);
+	serializer.getRootNode() % _value;
+	serializer.close();
+}
+
+
+
+
 
 }
 }
