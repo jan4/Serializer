@@ -110,6 +110,8 @@ struct DeserializerAdapter {
 	void deserialize(T& _value);
 	template<typename T>
 	void deserializeByInsert(std::function<void(T& v)> _func);
+	template<typename Key, typename Value>
+	void deserializeMap(std::map<Key, Value>& _map);
 };
 
 
@@ -398,6 +400,18 @@ void DeserializerAdapter::deserializeByInsert(std::function<void(T& v)> _func) {
 		_func(value);
 	}
 }
+template<typename Key, typename Value>
+void DeserializerAdapter::deserializeMap(std::map<Key, Value>& _map) {
+	int32_t size;
+	serializer.deserialize(size, needToKnowAddress);
+	for (int i {0}; i < size; ++i) {
+		std::pair<Key, Value> value;
+		serializer.deserialize(value, true);
+		_map[value.first] = value.second;
+	}
+
+}
+
 
 
 }

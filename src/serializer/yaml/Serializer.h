@@ -16,6 +16,14 @@
 namespace serializer {
 namespace yaml {
 
+template<typename T>
+std::string to_string(T const& _value) {
+	return std::to_string(_value);
+}
+inline std::string to_string(std::string const& _value) {
+	return _value;
+}
+
 class Serializer;
 
 template<typename T>
@@ -105,7 +113,12 @@ struct SerializerAdapter {
 	void serializeByIter(Iter iter, Iter end);
 
 	template<typename Iter>
+	void serializeMapByIter(Iter iter, Iter end);
+
+	template<typename Iter>
 	void serializeByIterCopy(Iter iter, Iter end);
+
+
 
 	template<typename T>
 	static constexpr bool isSimpleType() {
@@ -367,6 +380,19 @@ void SerializerAdapter::serializeByIter(Iter iter, Iter end) {
 		node.SetStyle(YAML::EmitterStyle::Flow);
 	}
 }
+template<typename Iter>
+void SerializerAdapter::serializeMapByIter(Iter iter, Iter end) {
+	for (; iter != end; ++iter) {
+		auto newNodePath = nodePath;
+		auto key = to_string(iter->first);
+		newNodePath.push_back(key);
+
+		YAML::Node tnode;
+		serializer.serialize(tnode, iter->second, newNodePath);
+		node[key] = tnode;
+	}
+}
+
 
 template<typename Iter>
 void SerializerAdapter::serializeByIterCopy(Iter iter, Iter end) {

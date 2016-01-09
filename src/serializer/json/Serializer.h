@@ -16,6 +16,15 @@
 namespace serializer {
 namespace json {
 
+template<typename T>
+std::string to_string(T const& _value) {
+	return std::to_string(_value);
+}
+inline std::string to_string(std::string const& _value) {
+	return _value;
+}
+
+
 class Serializer;
 
 template<typename T>
@@ -103,6 +112,9 @@ struct SerializerAdapter {
 
 	template<typename Iter>
 	void serializeByIter(Iter iter, Iter end);
+
+	template<typename Iter>
+	void serializeMapByIter(Iter iter, Iter end);
 
 	template<typename Iter>
 	void serializeByIterCopy(Iter iter, Iter end);
@@ -328,6 +340,19 @@ void SerializerAdapter::serializeByIter(Iter iter, Iter end) {
 		node.append(tnode);
 	}
 }
+template<typename Iter>
+void SerializerAdapter::serializeMapByIter(Iter iter, Iter end) {
+	node = Json::Value(Json::objectValue);
+	for (; iter != end; ++iter) {
+		auto newNodePath = nodePath;
+		newNodePath.push_back(to_string(iter->first));
+
+		Json::Value tnode;
+		serializer.serialize(tnode, iter->second, newNodePath);
+		node[to_string(iter->first)] = tnode;
+	}
+}
+
 
 template<typename Iter>
 void SerializerAdapter::serializeByIterCopy(Iter iter, Iter end) {

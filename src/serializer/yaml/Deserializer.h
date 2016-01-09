@@ -17,6 +17,36 @@
 namespace serializer {
 namespace yaml {
 
+template<typename T>
+struct from_string {
+	static T run(std::string const& _str) {
+		T typedKey;
+		std::stringstream ss;
+		ss << _str;
+		ss >> typedKey;
+		return typedKey;
+	}
+};
+template<>
+struct from_string<std::string> {
+	static std::string const& run(std::string const& _str) {
+		return _str;
+	}
+};
+template<>
+struct from_string<uint8_t> {
+	static uint8_t run(std::string const& _str) {
+		return (uint8_t)from_string<unsigned int>::run(_str);
+	}
+};
+template<>
+struct from_string<int8_t> {
+	static int8_t run(std::string const& _str) {
+		return (int8_t)from_string<int>::run(_str);
+	}
+};
+
+
 using NodePath = std::vector<std::string>;
 
 class Deserializer;
@@ -116,6 +146,9 @@ struct DeserializerAdapter {
 	void deserialize(T& _value);
 	template<typename T>
 	void deserializeByInsert(std::function<void(T& v)> _func);
+	template<typename Key, typename Value>
+	void deserializeMap(std::map<Key, Value>& _map);
+
 };
 
 
@@ -267,16 +300,31 @@ template<typename T>
 void DeserializerAdapter::deserializeByInsert(std::function<void(T& v)> _func) {
 	//if (not node.IsSequence() and not node.IsNull()) throw std::runtime_error("expected array");
 	if (node.IsSequence()) {
-	int32_t index { 0 };
-	for (auto v : node) {
-		T value;
-		NodePath newNodePath = nodePath;
-		newNodePath.emplace_back(std::to_string(index++));
-		serializer.deserialize(v, value, newNodePath);
-		_func(value);
-	}
+		int32_t index { 0 };
+		for (auto v : node) {
+			T value;
+			NodePath newNodePath = nodePath;
+			newNodePath.emplace_back(std::to_string(index++));
+			serializer.deserialize(v, value, newNodePath);
+			_func(value);
+		}
 	}
 }
+
+template<typename Key, typename Value>
+void DeserializerAdapter::deserializeMap(std::map<Key, Value>& _map) {
+	if (node.IsMap()) {
+		for (auto v : node) {
+			Value value;
+			NodePath newNodePath = nodePath;
+			auto key = v.first.as<std::string>();
+			newNodePath.emplace_back(key);
+			auto keyTyped = from_string<Key>::run(key);
+			serializer.deserialize(v.second, _map[keyTyped], newNodePath);
+		}
+	}
+}
+
 
 
 

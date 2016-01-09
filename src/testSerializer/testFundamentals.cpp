@@ -129,7 +129,7 @@ public:
 		bs1.getRootNode() % _in;
 		bs1.close();
 
-//		std::cout << "yaml:\n" << bs1.getDataAsStr() << std::endl;
+//		std::cout << "yaml:\n" << bs2.getDataAsStr() << std::endl;
 
 		T2 bs2 (bs1.getData());
 

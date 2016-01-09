@@ -5,6 +5,7 @@
 #include <json/json.h>
 #include <limits>
 #include <memory>
+#include <sstream>
 
 #include <serializer/Converter.h>
 #include <serializer/has_serialize_function.h>
@@ -16,6 +17,35 @@
 
 namespace serializer {
 namespace json {
+
+template<typename T>
+struct from_string {
+	static T run(std::string const& _str) {
+		T typedKey;
+		std::stringstream ss;
+		ss << _str;
+		ss >> typedKey;
+		return typedKey;
+	}
+};
+template<>
+struct from_string<std::string> {
+	static std::string const& run(std::string const& _str) {
+		return _str;
+	}
+};
+template<>
+struct from_string<uint8_t> {
+	static uint8_t run(std::string const& _str) {
+		return (uint8_t)from_string<unsigned int>::run(_str);
+	}
+};
+template<>
+struct from_string<int8_t> {
+	static int8_t run(std::string const& _str) {
+		return (int8_t)from_string<int>::run(_str);
+	}
+};
 
 using NodePath = std::vector<std::string>;
 
@@ -114,6 +144,9 @@ struct DeserializerAdapter {
 	void deserialize(T& _value);
 	template<typename T>
 	void deserializeByInsert(std::function<void(T& v)> _func);
+	template<typename Key, typename Value>
+	void deserializeMap(std::map<Key, Value>& _map);
+
 };
 
 
@@ -327,6 +360,19 @@ void DeserializerAdapter::deserializeByInsert(std::function<void(T& v)> _func) {
 		_func(value);
 	}
 }
+template<typename Key, typename Value>
+void DeserializerAdapter::deserializeMap(std::map<Key, Value>& _map) {
+	if (not node.isObject()) throw std::runtime_error("expected object: " + node.toStyledString());
+	for (auto const& key : node.getMemberNames()) {
+		NodePath newNodePath = nodePath;
+		newNodePath.emplace_back(key);
+		auto tnode = node[key];
+		Key typedKey = from_string<Key>::run(key);
+		auto& value = _map[typedKey];
+		serializer.deserialize(tnode, value, newNodePath);
+	}
+}
+
 
 
 

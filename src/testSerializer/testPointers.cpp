@@ -15,6 +15,8 @@ public:
 		//std::cout<<"json:"<<std::endl;
 		//std::cout<<(char*)bs1.getData().data()<<std::endl;
 		//std::cout<<":json"<<std::endl;
+		//std::cout << "yaml:\n" << bs1.getDataAsStr() << std::endl;
+
 
 		T2 bs2 (bs1.getData());
 

@@ -95,16 +95,12 @@ namespace serializer {
 	public:
 		template<typename Adapter>
 		static void serialize(Adapter& adapter, std::map<Key, Value>& x) {
-			adapter.serializeByIter(x.begin(), x.end());
+			adapter.serializeMapByIter(x.begin(), x.end());
 		}
 		template<typename Adapter>
 		static void deserialize(Adapter& adapter, std::map<Key, Value>& x) {
 			x.clear();
-			std::function<void(std::pair<Key, Value>&)> func = [&x]
-			(std::pair<Key, Value>& v) {
-				x.insert(v);
-			};
-			adapter.deserializeByInsert(func);
+			adapter.deserializeMap(x);
 		}
 	};
 

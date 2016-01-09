@@ -78,6 +78,8 @@ struct SerializerAdapter {
 	template<typename Iter>
 	void serializeByIter(Iter iter, Iter end);
 	template<typename Iter>
+	void serializeMapByIter(Iter iter, Iter end);
+	template<typename Iter>
 	void serializeByIterCopy(Iter iter, Iter end);
 
 };
@@ -377,6 +379,15 @@ void SerializerAdapter::serializeByIter(Iter iter, Iter end) {
 		serialize(*iter);
 	}
 }
+template<typename Iter>
+void SerializerAdapter::serializeMapByIter(Iter iter, Iter end) {
+	int32_t size = std::distance(iter, end);
+	serialize(size);
+	for (;iter != end; ++iter) {
+		serialize(*iter);
+	}
+}
+
 
 template<typename Iter>
 void SerializerAdapter::serializeByIterCopy(Iter iter, Iter end) {
