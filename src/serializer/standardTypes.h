@@ -11,6 +11,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 
@@ -31,6 +32,25 @@ namespace serializer {
 			adapter.deserializeByInsert(func);
 		}
 	};
+
+	template<typename T>
+	class Converter<T, typename std::enable_if<std::is_enum<T>::value>::type> {
+	private:
+		using Type = typename std::underlying_type<T>::type;
+	public:
+		template<typename Adapter>
+		static void serialize(Adapter& adapter, T& x) {
+			Type value = Type(x);
+			adapter.serialize(value);
+		}
+		template<typename Adapter>
+		static void deserialize(Adapter& adapter, T& x) {
+			Type value;
+			adapter.deserialize(value);
+			x = T(value);
+		}
+	};
+
 
 	template<typename T>
 	class Converter<std::list<T>> {

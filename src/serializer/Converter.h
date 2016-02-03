@@ -2,6 +2,6 @@
 
 namespace serializer {
 
-	template<typename ...T>
+	template<typename T1, class Enable=void, typename ...T>
 	class Converter;
 }

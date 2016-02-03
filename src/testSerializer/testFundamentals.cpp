@@ -226,6 +226,13 @@ void fullTestFundamentals() {
 
 	TestF<S, D>::runEQ(std::pair<uint8_t, uint16_t> {5, 6});
 	TestF<S, D>::runEQ(std::map <uint8_t, uint16_t> {{1, 2}, {3, 4}, {5, 6}});
+
+	enum class MyEnum : uint16_t { A, B=5, C=3 };
+	static_assert(std::is_enum<MyEnum>::value, "no enum");
+	static_assert(not std::is_enum<int>::value, "no int");
+	MyEnum myEnum = MyEnum::A;
+	TestF<S, D>::runEQ(myEnum);
+
 }
 template<typename S, typename D>
 void fullTestClasses() {
