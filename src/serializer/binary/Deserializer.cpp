@@ -5,9 +5,9 @@ namespace binary {
 
 DeserializerNode::DeserializerNode(Deserializer& _serializer, bool _available, bool _needToKnowAddress)
 	: serializer ( _serializer )
-	, available  { _available }
 	, needToKnowAddress { _needToKnowAddress }
 {
+	(void)_available;
 	serializer.deserialize(size, false);
 	startPoint = serializer.getCurrentPosition();
 }

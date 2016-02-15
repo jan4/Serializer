@@ -49,6 +49,7 @@ public:
 	template<typename T2, typename std::enable_if<not std::is_default_constructible<T2>::value
 	                                              or not std::is_assignable<T2, T2>::value>::type* = nullptr>
 	void getDefault(T2& _value) const {
+		(void)_value;
 		throw std::runtime_error("trying to construct object without default constructor");
 	}
 
@@ -62,6 +63,7 @@ public:
 	}
 	template<typename T2, typename std::enable_if<not std::is_assignable<T2, T2>::value>::type* = nullptr>
 	void operator or(T2 const& t) {
+		(void)t;
 		throw std::runtime_error("trying to us \"or\" on a not copyable datatype");
 	}
 
@@ -89,7 +91,6 @@ private:
 	Deserializer&    serializer;
 	std::vector<int> index;
 	int32_t          startPoint;
-	bool             available;
 	int32_t          size;
 	bool             needToKnowAddress;
 public:
