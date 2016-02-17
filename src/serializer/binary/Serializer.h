@@ -191,9 +191,13 @@ public:
 		return &buffer[0];
 	}
 
-	std::vector<uint8_t> const& getData() const {
+	auto getData() const -> std::vector<uint8_t> const& {
 		return buffer;
 	}
+	auto releaseData() -> std::vector<uint8_t> {
+		return std::move(buffer);
+	}
+
 
 	std::string getDataAsStr() const {
 		return "<binary>";
@@ -399,7 +403,16 @@ void SerializerAdapter::serializeByIterCopy(Iter iter, Iter end) {
 	}
 }
 
-template<typename T>
+template <typename T>
+void read(std::vector<uint8_t> _data, T& _value) {
+	// parse file in serializer
+	Deserializer serializer(std::move(_data));
+	serializer.getRootNode() % _value;
+	serializer.close();
+}
+
+
+template <typename T>
 void read(std::string const& _file, T& _value) {
 
 	// Read file from storage
@@ -414,24 +427,24 @@ void read(std::string const& _file, T& _value) {
 	ifs.read((char*)&data[0], int(data.size()));
 	ifs.close();
 
-   // parse file in serializer
-	Deserializer serializer(std::move(data));
-	serializer.getRootNode() % _value;
-	serializer.close();
+	read(std::move(data), _value);
 }
 
-template<typename T>
-void write(std::string const& _file, T& _value) {
+template <typename T>
+auto write(T const& _value) -> std::vector<uint8_t> {
 	// Serialize data
 	Serializer serializer;
-	serializer.getRootNode() % _value;
+	serializer.getRootNode() % const_cast<T&>(_value); // Ugly const cast, but we know that we are only reading
 	serializer.close();
-
+	return serializer.releaseData();
+}
+template<typename T>
+void write(std::string const& _file, T const& _value) {
 	std::ofstream oFile(_file, std::ios::binary);
 	if (oFile.fail()) {
 		throw std::runtime_error("Opening file failed");
 	}
-	auto const& data = serializer.getData();
+	auto data = write(_value);
 	oFile.write((char const*)&data[0], int(data.size()));
 	oFile.close();
 	if (oFile.fail()) {
