@@ -1,7 +1,5 @@
 #pragma once
 
-#include <armadillo>
-
 namespace serializer {
 	template<>
 	class Converter<arma::mat> {

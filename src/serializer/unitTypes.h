@@ -1,7 +1,5 @@
 #pragma once
 
-#include <units/units.h>
-
 namespace serializer {
 	template<typename T>
 	class Converter<Units::StrongDouble<T>> {
