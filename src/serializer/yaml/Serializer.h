@@ -16,12 +16,24 @@
 namespace serializer {
 namespace yaml {
 
+struct StringConvertTo {
+	static std::string to(std::string const& _value) {
+		return _value;
+	}
+	template <typename T, typename std::enable_if<not std::is_enum<T>::value>::type* = nullptr>
+	static std::string to(T const& _value) {
+		return std::to_string(_value);
+	}
+
+	template <typename T, typename std::enable_if<std::is_enum<T>::value>::type* = nullptr>
+	static std::string to(T const& _value) {
+		using Type = typename std::underlying_type<T>::type;
+		return to(Type(_value));
+	}
+};
 template<typename T>
 std::string to_string(T const& _value) {
-	return std::to_string(_value);
-}
-inline std::string to_string(std::string const& _value) {
-	return _value;
+	return StringConvertTo::to(_value);
 }
 
 class Serializer;

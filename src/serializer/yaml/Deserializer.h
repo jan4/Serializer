@@ -17,35 +17,38 @@
 namespace serializer {
 namespace yaml {
 
-template<typename T>
-struct from_string {
-	static T run(std::string const& _str) {
+struct StringConvertFrom {
+	static std::string from(std::string const& _value) {
+		return _value;
+	}
+	template <typename T, typename std::enable_if<not std::is_enum<T>::value
+	                                             && not std::is_same<T, uint8_t>::value
+	                                             && not std::is_same<T, int8_t>::value>::type* = nullptr>
+	static T from(std::string const& _value) {
 		T typedKey;
 		std::stringstream ss;
-		ss << _str;
+		ss << _value;
 		ss >> typedKey;
 		return typedKey;
 	}
-};
-template<>
-struct from_string<std::string> {
-	static std::string const& run(std::string const& _str) {
-		return _str;
+	template <typename T, typename std::enable_if<not std::is_enum<T>::value
+	                                             && (std::is_same<T, uint8_t>::value
+	                                             ||  std::is_same<T, int8_t>::value)>::type* = nullptr>
+	static T from(std::string const& _value) {
+		return T(from<int>(_value));
 	}
-};
-template<>
-struct from_string<uint8_t> {
-	static uint8_t run(std::string const& _str) {
-		return (uint8_t)from_string<unsigned int>::run(_str);
-	}
-};
-template<>
-struct from_string<int8_t> {
-	static int8_t run(std::string const& _str) {
-		return (int8_t)from_string<int>::run(_str);
-	}
-};
 
+
+	template <typename T, typename std::enable_if<std::is_enum<T>::value>::type* = nullptr>
+	static T from(std::string const& _value) {
+		using Type = typename std::underlying_type<T>::type;
+		return T(from<Type>(_value));
+	}
+};
+template<typename T>
+T from_string(std::string const& _value) {
+	return StringConvertFrom::from<T>(_value);
+}
 
 using NodePath = std::vector<std::string>;
 
@@ -319,7 +322,7 @@ void DeserializerAdapter::deserializeMap(std::map<Key, Value>& _map) {
 			NodePath newNodePath = nodePath;
 			auto key = v.first.as<std::string>();
 			newNodePath.emplace_back(key);
-			auto keyTyped = from_string<Key>::run(key);
+			auto keyTyped = from_string<Key>(key);
 			serializer.deserialize(v.second, _map[keyTyped], newNodePath);
 		}
 	}
