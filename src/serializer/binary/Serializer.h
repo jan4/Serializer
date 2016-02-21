@@ -112,8 +112,11 @@ private:
 	std::queue<std::function<void()>> sharedObjectFunctions;
 	std::map<void const*, int32_t> sharedToId;
 
+	bool mNoPointers;
+
 public:
-	Serializer() {
+	Serializer(bool _noPointers = false) {
+		mNoPointers = _noPointers;
 		// serialize number which jumps directly to lookup table of string to int32
 		serialize(int32_t(), false);
 
@@ -204,11 +207,16 @@ public:
 	}
 
 	void addKnownAddress(void const* _ptr, int32_t  _count, int32_t _size, int32_t _bufferPos, std::type_info const& _type_info) {
-		knownAddresses.push_back({_ptr, _count, _size, _type_info, _bufferPos});
+		if (not mNoPointers) {
+			knownAddresses.push_back({_ptr, _count, _size, _type_info, _bufferPos});
+		}
 	}
 
 	template<typename T>
 	int32_t addSharedObject(std::shared_ptr<T>& _value) {
+		if (mNoPointers) {
+			throw std::runtime_error("Serialize: serialization failed, rcan't add shared pointers in a no pointer environment.");
+		}
 		if (sharedToId.find(_value.get()) == sharedToId.end()) {
 			int32_t id = sharedToId.size();
 			sharedToId[_value.get()] = id;
@@ -431,20 +439,20 @@ void read(std::string const& _file, T& _value) {
 }
 
 template <typename T>
-auto write(T const& _value) -> std::vector<uint8_t> {
+auto write(T const& _value, bool usenopointers = false) -> std::vector<uint8_t> {
 	// Serialize data
-	Serializer serializer;
+	Serializer serializer(usenopointers);
 	serializer.getRootNode() % const_cast<T&>(_value); // Ugly const cast, but we know that we are only reading
 	serializer.close();
 	return serializer.releaseData();
 }
 template<typename T>
-void write(std::string const& _file, T const& _value) {
+void write(std::string const& _file, T const& _value, bool usenopointers = false) {
 	std::ofstream oFile(_file, std::ios::binary);
 	if (oFile.fail()) {
 		throw std::runtime_error("Opening file failed");
 	}
-	auto data = write(_value);
+	auto data = write(_value, usenopointers);
 	oFile.write((char const*)&data[0], int(data.size()));
 	oFile.close();
 	if (oFile.fail()) {
