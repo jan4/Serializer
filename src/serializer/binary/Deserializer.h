@@ -124,6 +124,8 @@ private:
 	std::vector<uint8_t> buffer;
 	int                  currentPosition { 0 };
 
+	bool useNoPointers;
+
 	DeserializerNodeInput rootNode { *this, true, true};
 
 	struct KnownAddress {
@@ -145,8 +147,10 @@ private:
 	std::map<int32_t, std::shared_ptr<void>> idToShared;
 
 public:
-	Deserializer(std::vector<uint8_t> _data)
-		: buffer {std::move(_data)} {
+	Deserializer(std::vector<uint8_t> _data, bool usenopointers = false)
+		: buffer {std::move(_data)}
+		, useNoPointers {usenopointers}
+	{
 
 		intToString[-1] = "";// Special entry that indicates not found string
 
@@ -223,7 +227,9 @@ public:
 	}
 
 	void addKnownAddress(void const* _ptr, int32_t  _count, int32_t _size, int32_t _bufferPos, std::type_info const& _type_info) {
-		knownAddresses.push_back({_ptr, _count, _size, _type_info, _bufferPos});
+		if (not useNoPointers) {
+			knownAddresses.push_back({_ptr, _count, _size, _type_info, _bufferPos});
+		}
 
 	}
 

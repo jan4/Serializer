@@ -412,16 +412,16 @@ void SerializerAdapter::serializeByIterCopy(Iter iter, Iter end) {
 }
 
 template <typename T>
-void read(std::vector<uint8_t> _data, T& _value) {
+void read(std::vector<uint8_t> _data, T& _value, bool usenopointers=false) {
 	// parse file in serializer
-	Deserializer serializer(std::move(_data));
+	Deserializer serializer(std::move(_data), usenopointers);
 	serializer.getRootNode() % _value;
 	serializer.close();
 }
 
 
 template <typename T>
-void read(std::string const& _file, T& _value) {
+void read(std::string const& _file, T& _value, bool usenopointers=false) {
 
 	// Read file from storage
 	std::ifstream ifs(_file, std::ios::binary);
@@ -435,7 +435,7 @@ void read(std::string const& _file, T& _value) {
 	ifs.read((char*)&data[0], int(data.size()));
 	ifs.close();
 
-	read(std::move(data), _value);
+	read(std::move(data), _value, usenopointers);
 }
 
 template <typename T>
