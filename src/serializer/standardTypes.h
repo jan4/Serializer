@@ -34,7 +34,7 @@ namespace serializer {
 		}
 	};
 
-	template<typename T, int N>
+	template<typename T, size_t N>
 	class Converter<std::array<T, N>> {
 	public:
 		template<typename Adapter>
@@ -43,7 +43,7 @@ namespace serializer {
 		}
 		template<typename Adapter>
 		static void deserialize(Adapter& adapter, std::array<T, N>& x) {
-			int idx = 0;
+			size_t idx = 0;
 			std::function<void(T&)> func = [&x, &idx](T& v) {
 				x[idx++] = std::move(v);
 			};
