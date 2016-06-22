@@ -6,6 +6,7 @@
 
 #include "Converter.h"
 
+#include <array>
 #include <list>
 #include <map>
 #include <memory>
@@ -32,6 +33,24 @@ namespace serializer {
 			adapter.deserializeByInsert(func);
 		}
 	};
+
+	template<typename T, int N>
+	class Converter<std::array<T, N>> {
+	public:
+		template<typename Adapter>
+		static void serialize(Adapter& adapter, std::array<T, N>& x) {
+			adapter.serializeByIter(x.begin(), x.end());
+		}
+		template<typename Adapter>
+		static void deserialize(Adapter& adapter, std::array<T, N>& x) {
+			int idx = 0;
+			std::function<void(T&)> func = [&x, &idx](T& v) {
+				x[idx++] = std::move(v);
+			};
+			adapter.deserializeByInsert(func);
+		}
+	};
+
 
 	template<typename T>
 	class Converter<T, typename std::enable_if<std::is_enum<T>::value>::type> {
