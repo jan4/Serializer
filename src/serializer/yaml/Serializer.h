@@ -431,7 +431,7 @@ void read(std::string const& _file, T& _value) {
 	// Read file from storage
 	std::ifstream ifs(_file);
 	if (ifs.fail()) {
-		throw std::runtime_error("Opening file failed");
+		throw std::runtime_error("Opening file failed: " + _file);
 	}
 	std::stringstream strStream;
 	strStream << ifs.rdbuf();
@@ -451,12 +451,12 @@ void write(std::string const& _file, T& _value) {
 
 	std::ofstream oFile(_file);
 	if (oFile.fail()) {
-		throw std::runtime_error("Opening file failed");
+		throw std::runtime_error("Opening file failed: " + _file);
 	}
 	oFile << serializer.getDataAsStr();
 	oFile.close();
 	if (oFile.fail()) {
-		throw std::runtime_error("Writing to file failed");
+		throw std::runtime_error("Writing to file failed: " + _file);
 	}
 }
 
