@@ -9,7 +9,7 @@
 #include <serializer/Converter.h>
 #include <serializer/has_serialize_function.h>
 
-#ifdef ABUILD_GENERICFACTORY
+#ifdef BUSY_GENERICFACTORY
 	#include <genericFactory/genericFactory.h>
 #endif
 
@@ -234,7 +234,7 @@ public:
 		addKnownAddress(&_value, _nodePath);
 
 		DeserializerNode node(*this, _node, true, _nodePath);
-#ifndef ABUILD_GENERICFACTORY
+#ifndef BUSY_GENERICFACTORY
 		_value.serialize(node);
 #else
 		if (genericFactory::hasType(&_value)) {

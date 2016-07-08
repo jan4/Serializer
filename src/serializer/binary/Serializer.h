@@ -7,7 +7,7 @@
 #include <queue>
 
 
-#ifdef ABUILD_GENERICFACTORY
+#ifdef BUSY_GENERICFACTORY
 	#include <genericFactory/genericFactory.h>
 #endif
 
@@ -304,7 +304,7 @@ public:
 		}
 		SerializerNode node(*this, _needToKnowAddress);
 
-#ifndef ABUILD_GENERICFACTORY
+#ifndef BUSY_GENERICFACTORY
 		_value.serialize(node);
 #else
 		if (genericFactory::hasType(&_value)) {

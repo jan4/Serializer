@@ -7,7 +7,7 @@
 #include "Deserializer.h"
 #include <serializer/standardTypes.h>
 
-#ifdef ABUILD_GENERICFACTORY
+#ifdef BUSY_GENERICFACTORY
 	#include <genericFactory/genericFactory.h>
 #endif
 
@@ -270,7 +270,7 @@ public:
 
 		SerializerNode node(*this, _node, _nodePath);
 
-#ifndef ABUILD_GENERICFACTORY
+#ifndef BUSY_GENERICFACTORY
 		_value.serialize(node);
 #else
 		if (genericFactory::hasType(&_value)) {

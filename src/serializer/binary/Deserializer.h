@@ -11,7 +11,7 @@
 #include <type_traits>
 #include <vector>
 
-#ifdef ABUILD_GENERICFACTORY
+#ifdef BUSY_GENERICFACTORY
 	#include <genericFactory/genericFactory.h>
 #endif
 
@@ -326,7 +326,7 @@ public:
 			addKnownAddress(&_value, 1, sizeof(T), getCurrentPosition(), typeid(T));
 		}
 		DeserializerNode node(*this, true, _needToKnowAddress);
-#ifndef ABUILD_GENERICFACTORY
+#ifndef BUSY_GENERICFACTORY
 		_value.serialize(node);
 #else
 		if (genericFactory::hasType(&_value)) {

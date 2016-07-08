@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef ABUILD_GENERICFACTORY
+#ifdef BUSY_GENERICFACTORY
 #include <genericFactory/genericFactory.h>
 #endif
 
@@ -170,7 +170,7 @@ namespace serializer {
 				: ptr (_ptr) {}
 
 			std::unique_ptr<T>* ptr;
-#ifndef ABUILD_GENERICFACTORY
+#ifndef BUSY_GENERICFACTORY
 			template<typename Node>
 			void serialize(Node& node) {
 				bool valid = ptr != nullptr;
@@ -201,7 +201,7 @@ namespace serializer {
 				: ptr (_ptr) {}
 			std::unique_ptr<T>* ptr;
 
-#ifndef ABUILD_GENERICFACTORY
+#ifndef BUSY_GENERICFACTORY
 			template<typename Node>
 			void serialize(Node& node) {
 				bool valid;
