@@ -1,8 +1,8 @@
 name: Serializer
 extRepositories:
-  - url: git@github.com:SGSSGene/gtest
-  - url: git@github.com:SGSSGene/jsoncpp
-  - url: git@github.com:SGSSGene/yaml-cpp
+  - url: https://github.com/SGSSGene/gtest
+  - url: https://github.com/SGSSGene/jsoncpp
+  - url: https://github.com/SGSSGene/yaml-cpp
 projects:
     - name: exampleSerializer
       type: executable
