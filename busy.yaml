@@ -1,8 +1,8 @@
 name: Serializer
 extRepositories:
-  - url: https://github.com/SGSSGene/gtest
-  - url: https://github.com/SGSSGene/jsoncpp
-  - url: https://github.com/SGSSGene/yaml-cpp
+  - url: https://github.com/jan4/gtest
+  - url: https://github.com/jan4/jsoncpp
+  - url: https://github.com/jan4/yaml-cpp
 projects:
     - name: exampleSerializer
       type: executable
